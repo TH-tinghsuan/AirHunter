@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>搜尋結果</title>
+        <style>
+            body {
+                background-color: #e3e8eb;
+            }
+            h1 {
+                text-align: center;
+            }
+
+            div[id="item"] {
+                max-width: 400px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            }
+        </style>
+    </head>
+    <body>
+        <h1>{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
+        <p style="text-align: center">🗓 {{date}}</p>
+       
+        {% if flight_info %}
+            {% for item in flight_info %}
+                <div id="item">
+                    <p>出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_time"] }}</p>
+                    <p>抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_time"] }}</p>
+                    <div>
+                        <p>航班資訊：</p>
+                        {% for i in item["items"]%}
+                        <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
+                        {% endfor %}
+                    </div>
+                </div>
+            {% endfor %}
+        {% else %}
+            <div id="item">
+                <p style="text-align: center">沒有符合的結果</p>
+            </div>
+        {% endif %}
+    </body>
+</html>
