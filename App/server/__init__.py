@@ -1,27 +1,20 @@
 from flask import Flask
-#from config import Config
-import pymysql.cursors
+from config import Config
 from dotenv import load_dotenv
 import os
+from flask_login import LoginManager
+from flask_sqlalchemy import SQLAlchemy
 
 load_dotenv()
 
 app = Flask(__name__)
-#app.config.from_object(Config)
-app.config['JSON_SORT_KEYS'] = False
-app.config['JSON_AS_ASCII'] = False
+app.config.from_object(Config)
+db = SQLAlchemy(app)
 
 
-#connect to mysql
-connection = pymysql.connect(host=os.environ.get("DB_HOST"),
-                             user=os.environ.get("DB_USERNAME"),
-                             password=os.environ.get("DB_PASSWORD"),
-                             database=os.environ.get("DB_DATABASE"),
-                             charset='utf8mb4',
-                             cursorclass=pymysql.cursors.DictCursor)
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'login'
 
-#create mysql cusor
-cursor = connection.cursor()
-connection.ping(reconnect=True)
 
-from server.controllers import search_controller
+from server.controllers import search_controller, user_controller
