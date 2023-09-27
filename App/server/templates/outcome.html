@@ -5,7 +5,36 @@
         <style>
             body {
                 background-color: #e3e8eb;
+                margin: 0;
+                padding: 0;
             }
+
+            .menubar{     
+            display: flex;
+            margin: auto;
+            background-color:whitesmoke;
+            justify-content: space-between;
+            }
+
+            .menubar a{
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            line-height: 30px;
+            }
+
+            .menubar a:link{
+                color:#333;
+            }
+
+            .menubar a:hover{
+                color:#333;
+            }
+
+            .menubar a:visited{
+                color: #333;
+            }
+
             h1 {
                 text-align: center;
             }
@@ -21,6 +50,19 @@
         </style>
     </head>
     <body>
+        <div class="menubar">
+            <div class="left-menu">
+                <a href="{{ url_for('index') }}">首頁</a>
+                <a href="{{ url_for('search_price') }}">機票比價</a>
+            </div>
+            <div class="right-menu">
+                {% if current_user.is_authenticated %}
+                <a href="#">會員專區</a><a href="{{ url_for('logout') }}">登出</a>
+                {% else %}
+                <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
+                {% endif %}
+            </div>
+        </div>
         <h1>{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
         <p style="text-align: center">🗓 {{date}}</p>
        
@@ -30,7 +72,7 @@
                     <p>出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_time"] }}</p>
                     <p>抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_time"] }}</p>
                     <div>
-                        <p>航班資訊：</p>
+                        <p>航班： {{ item["flight_info"]}}</p>
                         {% for i in item["items"]%}
                         <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
                         {% endfor %}
