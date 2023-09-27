@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>登入</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e3e8eb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menubar{   
+            height: 30px;  
+            display: flex;
+            background-color:whitesmoke;
+            justify-content: space-between;
+        }
+
+        .menubar a{
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            line-height: 30px;
+        }
+
+        .menubar a:link{
+                color:#333;
+            }
+
+        .menubar a:hover{
+            color:#333;
+        }
+
+        .menubar a:visited{
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 90%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 15px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="menubar">
+        <div class="left-menu">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <a href="{{ url_for('search_price') }}">機票比價</a>
+        </div>
+        <div class="right-menu">
+            <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
+        </div>
+    </div>
+    <h1>登入</h1>
+    {% with messages = get_flashed_messages(with_categories=True, category_filter=['register']) %}
+    {% if messages %}
+    {% for message in messages %}
+            <p align="center" style="color:#007bff;"">{{ message[1] }}</p>
+    {% endfor %}
+    {% endif %}
+    {% endwith %}
+    <form action="{{ url_for('login') }}" method="post">
+        
+        <label for="from">電子郵件</label>
+        {% with messages = get_flashed_messages(with_categories=True, category_filter=['account']) %}
+        {% if messages %}
+        {% for message in messages %}
+                <p align="left" style="color:brown; font-size: small;">{{ message[1] }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <input type="text" id="from" name="account" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('');" oninvalid="setCustomValidity('請輸入有效的電子郵件格式');"><br>
+        <label for="to">密碼</label>
+        {% with messages = get_flashed_messages(with_categories=True, category_filter=['password']) %}
+        {% if messages %}
+        {% for message in messages %}
+                <p align="left" style="color:brown; font-size: small;">{{ message[1] }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %}
+        <input type="password" id="to" name="password" required><br>
+        <button type="submit">登入</button>
+    </form>
+</body>
+</html>

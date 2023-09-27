@@ -1,0 +1,116 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>加入！成為新會員</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e3e8eb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menubar{     
+            display: flex;
+            margin: auto;
+            background-color:whitesmoke;
+            justify-content: space-between;
+        }
+
+        .menubar a{
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            line-height: 30px;
+        }
+
+        .menubar a:link{
+                color:#333;
+            }
+
+        .menubar a:hover{
+            color:#333;
+        }
+
+        .menubar a:visited{
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        form {
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+        }
+
+        label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #333;
+        }
+
+        input[type="text"],
+        input[type="password"],
+        select {
+            width: 90%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            border-radius: 3px;
+            font-size: 15px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+
+    </style>
+</head>
+<body>
+    <div class="menubar">
+        <div class="left-menu">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <a href="{{ url_for('search_price') }}">機票比價</a>
+        </div>
+        <div class="right-menu">
+            <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
+        </div>
+    </div>
+    <h1>註冊</h1>
+    <form action="{{ url_for('register') }}" method="post">
+        
+        <label for="from">電子郵件</label>
+        <input type="text" id="from" name="account" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('')" oninvalid="setCustomValidity('請輸入有效的電子郵件格式')"><br>
+
+        <label for="userName">使用者</label>
+        <input type="text" id="from" name="userName" required><br>
+
+        <label for="password">密碼</label>
+        <input type="password" id="inputPassword" name="password" required pattern="^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$" oninput="setCustomValidity('')" oninvalid="setCustomValidity('至少要使用 6 個位元，至少一個英文字元，至少一個數字')"><br>
+
+        <label for="password_confirm">確認密碼</label>
+        <input type="password" id="ConfirmPassword" name="password_confirm" required oninput="setCustomValidity('')" onchange="if(document.getElementById('inputPassword').value != document.getElementById('ConfirmPassword').value){setCustomValidity('前/後密碼不一致');}"><br>
+
+        <button type="submit">註冊</button>
+    </form>
+</body>
+</html>
