@@ -1,9 +1,8 @@
 from server import app, db
-from flask import render_template, redirect, request, url_for, flash, abort
-from flask_login import login_user, logout_user, login_required
-from server.models.users import User, get_user_name
-#from server.models.users import create_user, get_user_id
-
+from flask import render_template, redirect, request, url_for, flash
+from flask_login import login_user, logout_user, login_required, current_user
+from server.models.users import User, create_user_fav, del_user_fav, get_user_fav
+import json
 
 @app.route("/user/login", methods=["GET", "POST"])
 def login():
@@ -43,3 +42,42 @@ def register():
         flash("您已成功註冊為會員！", category="register")
         return redirect(url_for('login'))
     return render_template("register.html")
+
+@app.route("/user/favorites/add", methods=["POST"])
+def add_favorites():
+    flights_info = request.get_json()
+    main_info = {}
+    main_info['user_id'] = current_user.get_id()
+    main_info['arrive_airport_code'] = flights_info['arrive'].split(" ")[2]
+    main_info['arrive_time'] = flights_info['arrive'].split(" ")[3] + " " + flights_info['arrive'].split(" ")[4]
+    main_info['depart_airport_code'] = flights_info['depart'].split(" ")[2]
+    main_info['depart_time'] = flights_info['depart'].split(" ")[3] + " " + flights_info['depart'].split(" ")[4]
+    main_info['price'] = 2345
+    create_user_fav(main_info)
+    return "OK"
+
+@app.route("/user/favorites/remove", methods=["POST"])
+def del_favorites():
+    flights_info  = request.get_json()
+    main_info = {}
+    main_info["user_id"] = current_user.get_id()
+    main_info['arrive_airport_code'] = flights_info['arrive'].split(" ")[1]
+    main_info['arrive_time'] = flights_info['arrive'].split(" ")[2] + " " + flights_info['arrive'].split(" ")[3]
+    main_info['depart_airport_code'] = flights_info['depart'].split(" ")[1]
+    main_info['depart_time'] = flights_info['depart'].split(" ")[2] + " " + flights_info['depart'].split(" ")[3]
+    del_user_fav(main_info)
+    return "OK"
+
+@app.route("/user/member", methods=["GET"])
+def member():
+    return render_template("member.html")
+
+@app.route("/user/favorites/get", methods=["GET"])
+def get_favorites():
+    userID = current_user.get_id()
+    data = get_user_fav(userID)
+    return json.dumps(data, ensure_ascii=False)
+
+@app.route("/user/favorites", methods=["GET"])
+def favorites_list():
+    return render_template("favorite.html")

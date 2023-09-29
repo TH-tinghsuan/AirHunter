@@ -57,26 +57,31 @@
             </div>
             <div class="right-menu">
                 {% if current_user.is_authenticated %}
-                <a href="#">會員專區</a><a href="{{ url_for('logout') }}">登出</a>
+                <a href="{{ url_for('member') }}">會員專區</a><a href="{{ url_for('logout') }}">登出</a>
                 {% else %}
                 <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
                 {% endif %}
             </div>
         </div>
-        <h1>{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
+        <h1 id="city_name">{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
         <p style="text-align: center">🗓 {{date}}</p>
        
         {% if flight_info %}
             {% for item in flight_info %}
                 <div id="item">
-                    <p>出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_time"] }}</p>
-                    <p>抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_time"] }}</p>
+                    <p id="depart_time">出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_airport"]["IATA_code"]}} {{ item["depart_time"] }}</p>
+                    <p id="arrive_time">抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_airport"]["IATA_code"]}} {{ item["arrive_time"] }}</p>
                     <div>
                         <p>航班： {{ item["flight_info"]}}</p>
                         {% for i in item["items"]%}
                         <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
                         {% endfor %}
                     </div>
+                    {% if current_user.is_authenticated %}
+                        <div>
+                            <button id="favoriteBtn">加入收藏</button>
+                        </div>
+                    {% endif %}
                 </div>
             {% endfor %}
         {% else %}
@@ -84,5 +89,28 @@
                 <p style="text-align: center">沒有符合的結果</p>
             </div>
         {% endif %}
+    <script>
+        var buttons = document.querySelectorAll('#favoriteBtn');
+        buttons.forEach(function(button){
+            button.addEventListener('click', function() {
+                var flightInfoDiv = button.closest('#item');
+                var departTime = flightInfoDiv.querySelector('p:nth-child(1)').textContent;
+                var arriveTime = flightInfoDiv.querySelector('p:nth-child(2)').textContent;
+                var data = {
+                depart: departTime,
+                arrive: arriveTime
+                 };
+
+            fetch('/user/favorites/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })       
+        });
+    });
+
+    </script>
     </body>
 </html>
