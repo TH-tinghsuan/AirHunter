@@ -140,3 +140,117 @@ def search_result_to_dict(flight_info):
         return_json['minPrice'] = min(return_json['items'], key= lambda s: s["price"])["price"]
         total.append(return_json)
     return sorted(total, key= lambda s: s["minPrice"])
+
+def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, search_depart_time, search_return_time):
+    db.session.commit()
+    newest_batch_version = get_batch_version("domestic")
+
+    subquery_A = (
+    db.session.query(
+        Flights_domestic.depart_airport_code.label('A_depart_airport_code'),
+        Flights_domestic.depart_time.label('A_depart_time'),
+        Flights_domestic.arrive_airport_code.label('A_arrive_airport_code'),
+        Flights_domestic.arrive_time.label('A_arrive_time'),
+        Flights_domestic.airlineName.label('A_airlineName'),
+        Flights_domestic.flightCode.label('A_flightCode'),
+        Flights_domestic.agentName.label('A_agentName'),
+        Flights_domestic.price.label('A_price')
+    )
+    .filter(
+        Flights_domestic.batch_version == newest_batch_version,
+        func.DATE(Flights_domestic.depart_time) == search_depart_time,
+        Flights_domestic.depart_airport_code == search_depart_airport_code,
+        Flights_domestic.arrive_airport_code == search_arrive_airport_code
+    )
+    .subquery()
+    )
+
+    subquery_B = (
+    db.session.query(
+        Flights_domestic.depart_airport_code.label('B_depart_airport_code'),
+        Flights_domestic.depart_time.label('B_depart_time'),
+        Flights_domestic.arrive_airport_code.label('B_arrive_airport_code'),
+        Flights_domestic.arrive_time.label('B_arrive_time'),
+        Flights_domestic.airlineName.label('B_airlineName'),
+        Flights_domestic.flightCode.label('B_flightCode'),
+        Flights_domestic.agentName.label('B_agentName'),
+        Flights_domestic.price.label('B_price')
+    )
+    .filter(
+        Flights_domestic.batch_version == newest_batch_version,
+        func.DATE(Flights_domestic.depart_time) == search_return_time,
+        Flights_domestic.depart_airport_code == search_arrive_airport_code,
+        Flights_domestic.arrive_airport_code == search_depart_airport_code
+    )
+    .subquery()
+    )
+    
+    query = (
+    db.session.query(
+        subquery_A.c.A_flightCode,
+        subquery_A.c.A_depart_airport_code,
+        subquery_A.c.A_depart_time,
+        subquery_A.c.A_arrive_airport_code,
+        subquery_A.c.A_arrive_time,
+        subquery_A.c.A_airlineName,
+        subquery_B.c.B_flightCode,
+        subquery_B.c.B_depart_airport_code,
+        subquery_B.c.B_depart_time,
+        subquery_B.c.B_arrive_airport_code,
+        subquery_B.c.B_arrive_time,
+        func.group_concat(subquery_A.c.A_price + subquery_B.c.B_price).label('price'),
+        func.group_concat(subquery_A.c.A_agentName).label('agentName')
+    )
+    .select_from(
+        subquery_A
+        .join(
+            subquery_B,
+            (subquery_A.c.A_airlineName == subquery_B.c.B_airlineName) &
+            (subquery_A.c.A_agentName == subquery_B.c.B_agentName)
+        )
+    )
+    .group_by(
+        subquery_A.c.A_depart_time,
+        subquery_A.c.A_arrive_time,
+        subquery_A.c.A_airlineName,
+        subquery_B.c.B_depart_time,
+        subquery_B.c.B_arrive_time
+        )
+    )
+
+    results = query.all()
+    if results:
+        return rt_search_result_to_dict(results)
+    else:
+        return "No data"
+
+
+def rt_search_result_to_dict(flight_info):
+    total = []
+    for item in flight_info:
+        return_json = {}
+        airlineName_go = item.A_airlineName
+        return_json["go_flight_info"] = airlineName_go + " " + get_airline_detail(airlineName_go)['airline_code'] +item.A_flightCode
+        return_json['go_depart_time'] = item.A_depart_time.strftime('%Y-%m-%d %H:%M')
+        return_json['go_depart_airport'] = get_airport_detail(item.A_depart_airport_code)
+        return_json['go_arrive_time'] = item.A_arrive_time.strftime('%Y-%m-%d %H:%M')
+        return_json['go_arrive_airport'] = get_airport_detail(item.A_arrive_airport_code)
+        return_json["back_flight_info"] = airlineName_go + " " + get_airline_detail(airlineName_go)['airline_code'] +item.B_flightCode
+        return_json['back_depart_time'] = item.B_depart_time.strftime('%Y-%m-%d %H:%M')
+        return_json['back_depart_airport'] = get_airport_detail(item.B_depart_airport_code)
+        return_json['back_arrive_time'] = item.B_arrive_time.strftime('%Y-%m-%d %H:%M')
+        return_json['back_arrive_airport'] = get_airport_detail(item.B_arrive_airport_code)
+        
+        return_json['items'] = []
+        prices = item.price.split(",")
+        agNames =  item.agentName.split(",")
+        for i in range(len(prices)):
+            airlines = {}
+            airlines["price"] = prices[i]
+            airlines["agentName"] = agNames[i]
+            return_json['items'].append(airlines)
+        return_json['items'] = sorted(return_json['items'], key= lambda s: s["price"])
+        return_json['minPrice'] = min(return_json['items'], key= lambda s: s["price"])["price"]
+        total.append(return_json)
+    return sorted(total, key= lambda s: s["minPrice"])   
+    
