@@ -2,6 +2,7 @@ from server import db, login_manager
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin
 from sqlalchemy.sql import func
+from sqlalchemy import update
 from server.models.flight import get_airport_detail
 bcrypt = Bcrypt()
 
@@ -60,14 +61,14 @@ def create_user_fav(data):
     """
     query = UserFavorite.query.filter_by(user_id = data['user_id'],arrive_airport_code=data['arrive_airport_code'],
                                          arrive_time = data['arrive_time'], depart_airport_code=data['depart_airport_code'],
-                                         depart_time = data['depart_time'] )
-    if query:
-        query.update({"active": True})
-        db.session.commit()
-    else:
+                                         depart_time = data['depart_time']).first()
+    if not query:
         user_fav_model = UserFavorite(**data) 
         db.session.add(user_fav_model)
         db.session.commit()
+    else:
+        query.active = True
+        db.session.commit() 
 
         
 def del_user_fav(data):

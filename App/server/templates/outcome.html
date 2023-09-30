@@ -89,6 +89,8 @@
                 <p style="text-align: center">沒有符合的結果</p>
             </div>
         {% endif %}
+    
+        <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
     <script>
         var buttons = document.querySelectorAll('#favoriteBtn');
         buttons.forEach(function(button){
@@ -108,6 +110,7 @@
                 },
                 body: JSON.stringify(data)
             })       
+            swal("已加入收藏清單！", "", "success");
         });
     });
 

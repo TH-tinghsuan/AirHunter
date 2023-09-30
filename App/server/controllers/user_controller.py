@@ -49,7 +49,7 @@ def add_favorites():
     main_info = {}
     main_info['user_id'] = current_user.get_id()
     main_info['arrive_airport_code'] = flights_info['arrive'].split(" ")[2]
-    main_info['arrive_time'] = flights_info['arrive'].split(" ")[3] + " " + flights_info['arrive'].split(" ")[4]
+    main_info['arrive_time' ] = flights_info['arrive'].split(" ")[3] + " " + flights_info['arrive'].split(" ")[4]
     main_info['depart_airport_code'] = flights_info['depart'].split(" ")[2]
     main_info['depart_time'] = flights_info['depart'].split(" ")[3] + " " + flights_info['depart'].split(" ")[4]
     main_info['price'] = 2345
