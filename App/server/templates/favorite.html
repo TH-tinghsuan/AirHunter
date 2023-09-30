@@ -1,0 +1,174 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>我的收藏</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #e3e8eb;
+            margin: 0;
+            padding: 0;
+        }
+
+        .menubar{     
+            display: flex;
+            margin: auto;
+            background-color:whitesmoke;
+            justify-content: space-between;
+        }
+
+        .menubar a{
+            text-decoration: none;
+            font-family: Arial, sans-serif;
+            margin: 10px;
+            line-height: 30px;
+        }
+
+        .menubar a:link{
+                color:#333;
+            }
+
+        .menubar a:hover{
+            color:#333;
+        }
+
+        .menubar a:visited{
+            color: #333;
+        }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+
+        #fav-item {
+            position: relative;
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            display: flex; 
+            align-items: center;
+        }
+
+        img {
+            height: 20px;
+            width: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #link-detail {
+            font-size: 15px;
+            color: #333;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+        }
+
+        button[type="submit"] {
+            background-color: #007bff;
+            color: #fff;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 3px;
+            cursor: pointer;
+        }
+
+        button[type="submit"]:hover {
+            background-color: #0056b3;
+        }
+    </style>
+</head>
+<body>
+    <div class="menubar">
+        <div class="left-menu">
+            <a href="{{ url_for('index') }}">首頁</a>
+            <a href="{{ url_for('search_price') }}">機票比價</a>
+        </div>
+        <div class="right-menu">
+            {% if current_user.is_authenticated %}
+            <a href="{{ url_for('member') }}">會員專區</a><a href="{{ url_for('logout') }}">登出</a>
+            {% else %}
+            <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
+            {% endif %}
+        </div>
+    </div>
+    <h1>我的收藏</h1>
+    <div id="fav-list">
+    </div>
+    <script>
+        const favList = document.getElementById("fav-list")
+        favList.addEventListener("click", function (event){
+            if (event.target.id === "remove-fav-img"){
+                const button = event.target;
+                const flightInfoDiv = button.closest("#fav-item");
+                const departTime = flightInfoDiv.querySelector("p:nth-child(1)").textContent;
+                const arriveTime = flightInfoDiv.querySelector("p:nth-child(2)").textContent;
+                const data = {
+                    depart: departTime,
+                    arrive: arriveTime,
+                };
+                var myElement = flightInfoDiv;
+                myElement.style.display = "none";
+
+                fetch('/user/favorites/remove', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            });  
+            }
+        });
+        
+        fetch('/user/favorites/get')
+            .then(response => response.json())
+            .then(data => {
+                data.forEach(item => {
+                    const container = document.createElement("div");
+                    container.id = "fav-item"
+                    const text_container = document.createElement("div");
+                    text_container.id = "fav-item-text"
+                    const depart = document.createElement("p")
+                    depart.textContent = item.depart_airport + " " + item.depart_airport_code + " " + item.depart_time
+                    const arrive = document.createElement("p")
+                    arrive.textContent = item.arrive_airport + " " + item.arrive_airport_code + " " + item.arrive_time
+                    
+                    const link_container = document.createElement("div");
+                    link_container.id = "fav-item-link"
+                    
+                    remove_fav_link = document.createElement("a")
+                    remove_fav_link.href = '#'
+                    remove_fav_link.id = "remove-fav"
+                    remove_fav_img = document.createElement("img")
+                    remove_fav_img.id = "remove-fav-img"
+                    remove_fav_img.src = "https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/x-mark.png"
+                    remove_fav_link.appendChild(remove_fav_img)
+                    link_container.appendChild(remove_fav_link)
+                    
+                    detail_pg_link = document.createElement("a")
+                    detail_pg_link.id = "link-detail"
+                    detail_pg_link.href = `/flight/lists?schedule=oneWay&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_time.substring(0, 10)}`
+                    detail_pg_link.textContent = "前往票價頁面 >>"
+                    link_container.appendChild(detail_pg_link)
+            
+                    text_container.appendChild(depart)
+                    text_container.appendChild(arrive)
+                    container.appendChild(text_container)
+                    container.appendChild(link_container)
+                    favList.appendChild(container)
+                });
+            })
+            .catch(error => {
+                console.error('error occur:', error);
+            });
+    </script>      
+</body>
+</html>
