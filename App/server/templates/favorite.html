@@ -43,6 +43,11 @@
             color: #333;
         }
 
+        h2 {
+
+            text-align: center;
+            color:#007bff;    
+        }
 
         #fav-item {
             position: relative;
@@ -105,16 +110,36 @@
     </div>
     <script>
         const favList = document.getElementById("fav-list")
+        let data = {}
         favList.addEventListener("click", function (event){
             if (event.target.id === "remove-fav-img"){
                 const button = event.target;
                 const flightInfoDiv = button.closest("#fav-item");
-                const departTime = flightInfoDiv.querySelector("p:nth-child(1)").textContent;
-                const arriveTime = flightInfoDiv.querySelector("p:nth-child(2)").textContent;
-                const data = {
-                    depart: departTime,
-                    arrive: arriveTime,
-                };
+                const itemText = flightInfoDiv.querySelector("#fav-item-text");
+                if (itemText.querySelector("p:nth-child(1)").textContent === "單程"){
+                    const go_depart= flightInfoDiv.querySelector("p:nth-child(2)").textContent;
+                    const go_arrive = flightInfoDiv.querySelector("p:nth-child(3)").textContent;
+                    data = {
+                        go_depart: go_depart,
+                        go_arrive: go_arrive,
+                        back_depart: null,
+                        back_arrive: null,
+                        schedule: "oneWay"
+                        };
+                }
+                else if (itemText.querySelector("p:nth-child(1)").textContent === "去程"){
+                    const go_depart= flightInfoDiv.querySelector("p:nth-child(2)").textContent;
+                    const go_arrive = flightInfoDiv.querySelector("p:nth-child(3)").textContent;
+                    const back_depart= flightInfoDiv.querySelector("p:nth-child(5)").textContent;
+                    const back_arrive = flightInfoDiv.querySelector("p:nth-child(6)").textContent;
+                    data = {
+                        go_depart: go_depart,
+                        go_arrive: go_arrive,
+                        back_depart: back_depart,
+                        back_arrive: back_arrive,
+                        schedule: "return"
+                        };
+                }
                 var myElement = flightInfoDiv;
                 myElement.style.display = "none";
 
@@ -131,40 +156,81 @@
         fetch('/user/favorites/get')
             .then(response => response.json())
             .then(data => {
-                data.forEach(item => {
-                    const container = document.createElement("div");
-                    container.id = "fav-item"
-                    const text_container = document.createElement("div");
-                    text_container.id = "fav-item-text"
-                    const depart = document.createElement("p")
-                    depart.textContent = item.depart_airport + " " + item.depart_airport_code + " " + item.depart_time
-                    const arrive = document.createElement("p")
-                    arrive.textContent = item.arrive_airport + " " + item.arrive_airport_code + " " + item.arrive_time
+                if (data.length === 0){
+                    wording = document.createElement("h2");
+                    wording.textContent = "收藏清單裡目前沒有東西～～";
+                    document.body.appendChild(wording);
+                }
+                else{
+                    data.forEach(item => {
+                        const container = document.createElement("div");
+                        container.id = "fav-item"
+                        const text_container = document.createElement("div");
+                        text_container.id = "fav-item-text"
+                        if (item.schedule === "return"){
+                            const go = document.createElement("p")
+                            go.textContent = "去程"
+                            go.style.fontWeight = "bold"
+                            const go_depart = document.createElement("p")
+                            go_depart.textContent = item.go_depart_airport + " " + item.go_depart_airport_code + " " + item.go_depart_time
+                            const go_arrive = document.createElement("p")
+                            go_arrive.textContent = item.go_arrive_airport + " " + item.go_arrive_airport_code + " " + item.go_arrive_time
+                            const back = document.createElement("p")
+                            back.textContent = "回程"
+                            back.style.fontWeight = "bold"
+                            const back_depart = document.createElement("p")
+                            back_depart.textContent = item.back_depart_airport + " " + item.back_depart_airport_code + " " + item.back_depart_time
+                            const back_arrive = document.createElement("p")
+                            back_arrive.textContent = item.back_arrive_airport + " " + item.back_arrive_airport_code + " " + item.back_arrive_time
+                            text_container.appendChild(go)
+                            text_container.appendChild(go_depart)
+                            text_container.appendChild(go_arrive)
+                            text_container.appendChild(back)
+                            text_container.appendChild(back_depart)
+                            text_container.appendChild(back_arrive)
+                        }
+                        else if (item.schedule === "oneWay"){
+                            const go = document.createElement("p")
+                            go.textContent = "單程"
+                            go.style.fontWeight = "bold"
+                            const go_depart = document.createElement("p")
+                            go_depart.textContent = item.go_depart_airport + " " + item.go_depart_airport_code + " " + item.go_depart_time
+                            const go_arrive = document.createElement("p")
+                            go_arrive.textContent = item.go_arrive_airport + " " + item.go_arrive_airport_code + " " + item.go_arrive_time
+                            text_container.appendChild(go)
+                            text_container.appendChild(go_depart)
+                            text_container.appendChild(go_arrive)
+                        }
                     
-                    const link_container = document.createElement("div");
-                    link_container.id = "fav-item-link"
-                    
-                    remove_fav_link = document.createElement("a")
-                    remove_fav_link.href = '#'
-                    remove_fav_link.id = "remove-fav"
-                    remove_fav_img = document.createElement("img")
-                    remove_fav_img.id = "remove-fav-img"
-                    remove_fav_img.src = "https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/x-mark.png"
-                    remove_fav_link.appendChild(remove_fav_img)
-                    link_container.appendChild(remove_fav_link)
-                    
-                    detail_pg_link = document.createElement("a")
-                    detail_pg_link.id = "link-detail"
-                    detail_pg_link.href = `/flight/lists?schedule=oneWay&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_time.substring(0, 10)}`
-                    detail_pg_link.textContent = "前往票價頁面 >>"
-                    link_container.appendChild(detail_pg_link)
-            
-                    text_container.appendChild(depart)
-                    text_container.appendChild(arrive)
-                    container.appendChild(text_container)
-                    container.appendChild(link_container)
-                    favList.appendChild(container)
-                });
+                        
+                        const link_container = document.createElement("div");
+                        link_container.id = "fav-item-link"
+                        
+                        remove_fav_link = document.createElement("a")
+                        remove_fav_link.href = '#'
+                        remove_fav_link.id = "remove-fav"
+                        remove_fav_img = document.createElement("img")
+                        remove_fav_img.id = "remove-fav-img"
+                        remove_fav_img.src = "https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/x-mark.png"
+                        remove_fav_link.appendChild(remove_fav_img)
+                        link_container.appendChild(remove_fav_link)
+                        
+                        detail_pg_link = document.createElement("a")
+                        detail_pg_link.id = "link-detail"
+                        if (item.schedule == "oneWay"){
+                            detail_pg_link.href = `/flight/lists?schedule=${item.schedule}&departureAirports=${item.go_depart_airport_code}&arriveAirports=${item.go_arrive_airport_code}&departureDates=${item.go_depart_time.substring(0, 10)}`
+                        }
+                        else if (item.schedule == "return"){
+                        detail_pg_link.href = `/flight/lists?schedule=${item.schedule}&departureAirports=${item.go_depart_airport_code}&arriveAirports=${item.go_arrive_airport_code}&departureDates=${item.go_depart_time.substring(0, 10)}&returnDates=${item.back_depart_time.substring(0, 10)}`
+                        }
+                        detail_pg_link.textContent = "前往票價頁面 >>"
+                        link_container.appendChild(detail_pg_link)
+                
+                        container.appendChild(text_container)
+                        container.appendChild(link_container)
+                        favList.appendChild(container)
+                    });
+                }
             })
             .catch(error => {
                 console.error('error occur:', error);

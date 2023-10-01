@@ -63,31 +63,63 @@
                 {% endif %}
             </div>
         </div>
-        <h1 id="city_name">{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
-        <p style="text-align: center">🗓 {{date}}</p>
-       
         {% if flight_info %}
-            {% for item in flight_info %}
-                <div id="item">
-                    <p id="depart_time">出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_airport"]["IATA_code"]}} {{ item["depart_time"] }}</p>
-                    <p id="arrive_time">抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_airport"]["IATA_code"]}} {{ item["arrive_time"] }}</p>
-                    <div>
-                        <p>航班： {{ item["flight_info"]}}</p>
-                        {% for i in item["items"]%}
-                        <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
-                        {% endfor %}
-                    </div>
-                    {% if current_user.is_authenticated %}
-                        <div>
-                            <button id="favoriteBtn">加入收藏</button>
+            {% if schedule == "oneWay" %}
+                <h1 id="city_name">{{ depart["city_name"] }} ➡️ {{ arrive["city_name"] }} </h1>
+                <p style="text-align: center">🗓 {{date}}</p>
+                {% for item in flight_info %}
+                    <div id="item">
+                        <div id="go">
+                            <p id="depart_time">出發： {{ item["depart_airport"]["airport_name"]}} {{ item["depart_airport"]["IATA_code"]}} {{ item["depart_time"] }}</p>
+                            <p id="arrive_time">抵達： {{ item["arrive_airport"]["airport_name"]}} {{ item["arrive_airport"]["IATA_code"]}} {{ item["arrive_time"] }}</p>
                         </div>
-                    {% endif %}
-                </div>
-            {% endfor %}
+                        <div>
+                            <p>航班： {{ item["flight_info"]}}</p>
+                            {% for i in item["items"]%}
+                            <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
+                            {% endfor %}
+                        </div>
+                        {% if current_user.is_authenticated %}
+                            <div>
+                                <button id="favoriteBtn">加入收藏</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% elif schedule == "return" %}
+                <h1 id="city_name">{{ depart["city_name"] }} ↔️ {{ arrive["city_name"] }} </h1>
+                <p style="text-align: center">🗓 {{ dp_date }} - {{ rt_date }}</p>
+                {% for item in flight_info %}
+                    <div id="item">
+                        <div id="go">
+                            <p style="font-weight:bold">去程</p>
+                            <p>{{ item["go_flight_info"]}}</p>
+                            <p id="depart_time">出發： {{ item["go_depart_airport"]["airport_name"]}} {{ item["go_depart_airport"]["IATA_code"]}} {{ item["go_depart_time"] }}</p>
+                            <p id="arrive_time">抵達： {{ item["go_arrive_airport"]["airport_name"]}} {{ item["go_arrive_airport"]["IATA_code"]}} {{ item["go_arrive_time"] }}</p>
+                        </div>
+                        <div id="back">
+                            <p style="font-weight:bold">回程</p>
+                            <p>{{ item["back_flight_info"]}}</p>
+                            <p id="depart_time">出發： {{ item["back_depart_airport"]["airport_name"]}} {{ item["back_depart_airport"]["IATA_code"]}} {{ item["back_depart_time"] }}</p>
+                            <p id="arrive_time">抵達： {{ item["back_arrive_airport"]["airport_name"]}} {{ item["back_arrive_airport"]["IATA_code"]}} {{ item["back_arrive_time"] }}</p>
+                        </div>
+                        <div id="price">
+                            {% for i in item["items"]%}
+                            <ul>價格：{{ i["price"] }} 旅行社：{{ i["agentName"]}}</ul>
+                            {% endfor %}
+                        </div>
+                        {% if current_user.is_authenticated %}
+                            <div>
+                                <button id="favoriteBtn">加入收藏</button>
+                            </div>
+                        {% endif %}
+                    </div>
+                {% endfor %}
+            {% endif %}
         {% else %}
-            <div id="item">
-                <p style="text-align: center">沒有符合的結果</p>
-            </div>
+        <div id="item">
+            <p style="text-align: center">沒有符合的結果</p>
+        </div>
         {% endif %}
     
         <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
@@ -96,12 +128,34 @@
         buttons.forEach(function(button){
             button.addEventListener('click', function() {
                 var flightInfoDiv = button.closest('#item');
-                var departTime = flightInfoDiv.querySelector('p:nth-child(1)').textContent;
-                var arriveTime = flightInfoDiv.querySelector('p:nth-child(2)').textContent;
-                var data = {
-                depart: departTime,
-                arrive: arriveTime
-                 };
+                if (flightInfoDiv.querySelector('#back') != null) {
+                    var goInfo = flightInfoDiv.querySelector('#go');
+                    var go_departTime = goInfo.querySelector('p:nth-child(3)').textContent;
+                    var go_arriveTime = goInfo.querySelector('p:nth-child(4)').textContent;
+                    var backInfo = flightInfoDiv.querySelector('#back');
+                    var back_departTime = backInfo.querySelector('p:nth-child(3)').textContent;
+                    var back_arriveTime = backInfo.querySelector('p:nth-child(4)').textContent;
+                    var data = {
+                    schedule: "return",
+                    go_depart: go_departTime,
+                    go_arrive: go_arriveTime,
+                    back_depart:back_departTime,
+                    back_arrive: back_arriveTime
+                    };
+                }
+                else {
+                    var goInfo = flightInfoDiv.querySelector('#go');
+                    var go_departTime = goInfo.querySelector('p:nth-child(1)').textContent;
+                    var go_arriveTime = goInfo.querySelector('p:nth-child(2)').textContent;
+                    var data = {
+                    schedule: "oneWay",    
+                    go_depart: go_departTime,
+                    go_arrive: go_arriveTime,
+                    back_depart: null,
+                    back_arrive: null
+                    };
+                }
+                
 
             fetch('/user/favorites/add', {
                 method: 'POST',

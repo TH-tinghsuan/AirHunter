@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>機票比價查詢</title>
+    <title>國內機票比價查詢</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -90,7 +90,7 @@
     <div class="menubar">
         <div class="left-menu">
             <a href="{{ url_for('index') }}">首頁</a>
-            <a href="{{ url_for('search_price') }}">機票比價</a>
+            <a href="{{ url_for('search_price') }}">國內機票比價</a>
         </div>
         <div class="right-menu">
             {% if current_user.is_authenticated %}
@@ -100,10 +100,10 @@
             {% endif %}
         </div>
     </div>
-    <h1>機票比價查詢✈️</h1>
+    <h1>國內機票比價✈️</h1>
     <form action="{{ url_for('get_flight_lists') }}" method="GET">
         <label for="schedule">行程</label>
-        <select name="schedule">
+        <select name="schedule" id="scheduleSelect">
             <option value="oneWay" selected>單程</option>
             <option value="return">來回</option>
         </select><br>
@@ -117,13 +117,27 @@
         <label for="depart_date">出發日期</label>
         <input type="date" id="depart_date" name="departureDates" required><br>
 
-        <!-- <label for="return_date">回程日期：</label>
-        <input type="date" id="return_date" name="returnDates"><br> -->
+        <label for="return_date" id="returnDateLabel" style="display: none;">回程日期：</label>
+        <input type="date" id="return_date" name="returnDates" style="display: none;"><br>
 
-        <!-- <label for="passengers">乘客人数：</label>
-        <input type="number" id="passengers" name="passengers" min="1" required><br> -->
 
         <button type="submit">搜尋</button>
     </form>
+    <script>
+        const scheduleSelect = document.getElementById('scheduleSelect');
+        const returnDateLabel = document.getElementById('returnDateLabel');
+        const returnDateInput = document.getElementById('return_date');
+    
+        scheduleSelect.addEventListener('change', function () {
+            if (scheduleSelect.value === 'return') {
+                returnDateLabel.style.display = 'block';
+                returnDateInput.style.display = 'block';
+            } else {
+                returnDateLabel.style.display = 'none';
+                returnDateInput.style.display = 'none';
+            }
+        });
+        
+    </script>
 </body>
 </html>
