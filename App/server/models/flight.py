@@ -160,7 +160,8 @@ def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, 
         Flights_domestic.batch_version == newest_batch_version,
         func.DATE(Flights_domestic.depart_time) == search_depart_time,
         Flights_domestic.depart_airport_code == search_depart_airport_code,
-        Flights_domestic.arrive_airport_code == search_arrive_airport_code
+        Flights_domestic.arrive_airport_code == search_arrive_airport_code,
+        Flights_domestic.price.isnot(None)
     )
     .subquery()
     )
@@ -180,7 +181,8 @@ def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, 
         Flights_domestic.batch_version == newest_batch_version,
         func.DATE(Flights_domestic.depart_time) == search_return_time,
         Flights_domestic.depart_airport_code == search_arrive_airport_code,
-        Flights_domestic.arrive_airport_code == search_depart_airport_code
+        Flights_domestic.arrive_airport_code == search_depart_airport_code,
+        Flights_domestic.price.isnot(None)
     )
     .subquery()
     )
