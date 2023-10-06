@@ -19,7 +19,7 @@ def login():
         elif user.check_password(password) and user is not None:
             login_user(user)
             flash("您已成功登入！", category="success")
-            return redirect(url_for('index'))
+            return redirect(url_for('search_price'))
         
     return render_template("login.html")
 
@@ -28,7 +28,7 @@ def login():
 def logout():
     logout_user()
     flash("您已經成功登出")
-    return redirect(url_for('index'))
+    return redirect(url_for('search_price'))
 
 @app.route("/user/signup", methods=["GET", "POST"])
 def register():
@@ -46,56 +46,27 @@ def register():
 @app.route("/user/favorites/add", methods=["POST"])
 def add_favorites():
     flights_info = request.get_json()
-    if flights_info["schedule"] == "return":
-        main_info = {}
-        main_info['user_id'] = current_user.get_id()
-        main_info['go_arrive_airport_code'] = flights_info['go_arrive'].split(" ")[2]
-        main_info['go_arrive_time' ] = flights_info['go_arrive'].split(" ")[3] + " " + flights_info['go_arrive'].split(" ")[4]
-        main_info['go_depart_airport_code'] = flights_info['go_depart'].split(" ")[2]
-        main_info['go_depart_time'] = flights_info['go_depart'].split(" ")[3] + " " + flights_info['go_depart'].split(" ")[4]
-        main_info['back_arrive_airport_code'] = flights_info['back_arrive'].split(" ")[2]
-        main_info['back_arrive_time' ] = flights_info['back_arrive'].split(" ")[3] + " " + flights_info['back_arrive'].split(" ")[4]
-        main_info['back_depart_airport_code'] = flights_info['back_depart'].split(" ")[2]
-        main_info['back_depart_time'] = flights_info['back_depart'].split(" ")[3] + " " + flights_info['back_depart'].split(" ")[4]
-        main_info['price'] = 2345
-        create_user_fav(main_info)
-        return "OK"
-    elif flights_info["schedule"] == "oneWay":
-        main_info = {}
-        main_info['user_id'] = current_user.get_id()
-        main_info['go_arrive_airport_code'] = flights_info['go_arrive'].split(" ")[2]
-        main_info['go_arrive_time' ] = flights_info['go_arrive'].split(" ")[3] + " " + flights_info['go_arrive'].split(" ")[4]
-        main_info['go_depart_airport_code'] = flights_info['go_depart'].split(" ")[2]
-        main_info['go_depart_time'] = flights_info['go_depart'].split(" ")[3] + " " + flights_info['go_depart'].split(" ")[4]
-        main_info['back_arrive_airport_code'] = None
-        main_info['back_arrive_time' ] = None
-        main_info['back_depart_airport_code'] = None
-        main_info['back_depart_time'] = None
-        main_info['price'] = 2345
-        create_user_fav(main_info)
-        return "OK"
+    main_info = {}
+    main_info['user_id'] = current_user.get_id()
+    main_info['depart_airport_code'] = flights_info['departAirport']
+    main_info['arrive_airport_code' ] = flights_info['arriveAirport']
+    main_info['depart_date'] = flights_info['departDate']
+    main_info['return_date'] = flights_info['returnDates'] if flights_info["schedule"] == "return" else "1970-01-01"
+    main_info['min_price'] = flights_info['minPrice']
+    main_info['schedule'] = flights_info["schedule"]
+    print(main_info)
+    create_user_fav(main_info)
+    return "OK"
+
     
 
 @app.route("/user/favorites/remove", methods=["POST"])
 def del_favorites():
     flights_info  = request.get_json()
-    main_info = {}
-    main_info["user_id"] = current_user.get_id()
-    main_info['go_arrive_airport_code'] = flights_info['go_arrive'].split(" ")[1]
-    main_info['go_arrive_time'] = flights_info['go_arrive'].split(" ")[2] + " " + flights_info['go_arrive'].split(" ")[3]
-    main_info['go_depart_airport_code'] = flights_info['go_depart'].split(" ")[1]
-    main_info['go_depart_time'] = flights_info['go_depart'].split(" ")[2] + " " + flights_info['go_depart'].split(" ")[3]
-    if flights_info['schedule'] == "return":
-        main_info['back_arrive_airport_code'] = flights_info['back_arrive'].split(" ")[1]
-        main_info['back_arrive_time'] = flights_info['back_arrive'].split(" ")[2] + " " + flights_info['back_arrive'].split(" ")[3]
-        main_info['back_depart_airport_code'] = flights_info['back_depart'].split(" ")[1]
-        main_info['back_depart_time'] = flights_info['back_depart'].split(" ")[2] + " " + flights_info['back_depart'].split(" ")[3]
-    elif flights_info['schedule'] == "oneWay":
-        main_info['back_arrive_airport_code'] = None
-        main_info['back_arrive_time'] = None
-        main_info['back_depart_airport_code'] = None
-        main_info['back_depart_time'] = None
-    del_user_fav(main_info)
+    flights_info["user_id"] = current_user.get_id()
+    if flights_info["return_date"] == None:
+        flights_info["return_date"] = "1970-01-01"
+    del_user_fav(flights_info)
     return "OK"
 
 @app.route("/user/member", methods=["GET"])

@@ -1,16 +1,17 @@
 from flask import Flask
 from config import Config
 from dotenv import load_dotenv
-import os
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
+from dash import Dash
 
 load_dotenv()
 
 app = Flask(__name__)
 app.config.from_object(Config)
-db = SQLAlchemy(app)
+db = SQLAlchemy(app) 
 
+dash_app = Dash(__name__, server=app, url_base_pathname='/price/graph/')
 
 login_manager = LoginManager()
 login_manager.init_app(app)

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>加入！成為新會員</title>
+    <title>歷史價格查詢</title>
     <style>
         body {
             font-family: Arial, sans-serif;
@@ -41,49 +41,25 @@
                     text-decoration:none;
                     color: black;
                 }
+
         h1 {
             text-align: center;
             color: #333;
         }
 
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        select {
-            width: 90%;
+        #condition {
+            margin: auto;
+            width: 80%;
             padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 15px;
         }
 
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 3px;
-            cursor: pointer;
+        input:invalid {
+        outline: none;
         }
 
-        button[type="submit"]:hover {
-            background-color: #0056b3;
+        input[text] {
+            border: #333;
+            border-radius: 5px;
         }
 
     </style>
@@ -112,22 +88,24 @@
             </nav>
         </div> 
     </div> 
-    <h1>註冊</h1>
-    <form action="{{ url_for('register') }}" method="post">
-        
-        <label for="from">電子郵件</label>
-        <input type="text" id="from" name="account" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('')" oninvalid="setCustomValidity('請輸入有效的電子郵件格式')"><br>
-
-        <label for="userName">使用者</label>
-        <input type="text" id="from" name="userName" required><br>
-
-        <label for="password">密碼</label>
-        <input type="password" id="inputPassword" name="password" required pattern="^(?=.*[a-zA-Z])(?=.*[0-9]).{6,}$" oninput="setCustomValidity('')" oninvalid="setCustomValidity('至少要使用 6 個位元，至少一個英文字元，至少一個數字')"><br>
-
-        <label for="password_confirm">確認密碼</label>
-        <input type="password" id="ConfirmPassword" name="password_confirm" required oninput="setCustomValidity('')" onchange="if(document.getElementById('inputPassword').value != document.getElementById('ConfirmPassword').value){setCustomValidity('前/後密碼不一致');}"><br>
-
-        <button type="submit">註冊</button>
+    <h1>機票價格時間趨勢圖</h1>
+    <form id="condition" action="{{ url_for('price_graph') }}" method="get">
+        <label for="depart">出發地</label>
+        <input type="text" id="from" name="depart" required>
+        <label for="arrive">目的地</label>
+        <input type="text" id="to" name="arrive" required>
+        <button type="submit">查詢</button>
     </form>
+    {% if dash_html %}
+        <div id="dash-content">
+            {{ dash_html|safe }}
+        </div>
+    {% endif %}
+    {% if text %}
+        <div id="dash-content">
+            <p style="text-align: center">{{ text }}</p>
+        </div>
+    {% endif %}
+    
 </body>
 </html>
