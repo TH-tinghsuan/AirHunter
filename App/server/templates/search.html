@@ -1,143 +1,299 @@
 <!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>國內機票比價查詢</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #e3e8eb;
-            margin: 0;
-            padding: 0;
-        }
+<html>
+    <head>
+        <title>國內機票比價</title>
+        <link rel="stylesheet" href="style.css">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <style>
+                .container {
+                    box-sizing: border-box;
+                    padding-left: 2%;
+                    padding-right: 2%;
+                    background-color:white;
+                }
+                .navbar {
+                    display: flex;
+                    align-items: center;
+                }
 
-        .menubar{     
-            display: flex;
-            margin: auto;
-            background-color:whitesmoke;
-            justify-content: space-between;
-        }
+                nav {
+                    margin-left: auto; 
+                }
+                nav ul li {
+                    display: inline;
+                    margin-left: 15px;
+                    list-style: none;   
+                }
+                img {
+                    height: 30px;
+                    width: 30px;
+                    padding: 5px;
+                }
 
-        .menubar a{
-            text-decoration: none;
-            font-family: Arial, sans-serif;
-            margin: 10px;
-            line-height: 30px;
-        }
+                .background-container {
+                    position: relative; 
+                    width: 100%;
+                    height: 400px; 
+                }
 
-        .menubar a:link{
-                color:#333;
-            }
+                .wallpaper {
+                    position: relative; 
+                    width: 100%; 
+                    height: 100%;
+                    background-image: url('https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/mark-olsen-K5j1KgecVC8-unsplash.jpg');
+                    background-size: cover;
+                    background-repeat: no-repeat;   
+                }
 
-        .menubar a:hover{
-            color:#333;
-        }
+                .title {
+                    font-weight: bold; 
+                    color: white; 
+                    font-size: 35px; 
+                    padding-left: 5%; 
+                    padding-top: 5%; 
+                    margin: 0;
+                }
 
-        .menubar a:visited{
-            color: #333;
-        }
+                input[type="date"]
+                {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    font-size: 15px;
+                    width: 150px;
+                }
+                
+                .from-to {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    font-size: 15px;
+                    width: 200px;
+                }
 
-        h1 {
-            text-align: center;
-            color: #333;
-        }
+                label {
+                    font-size: 20px;
+                }
 
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
+                .search-box {
+                    height: 150px;
+                    width: 880px;
+                    margin-left: 5%;
+                    margin-top: 40px;
+                    margin-bottom: 40px;
+                    margin-right: 80px;
+                    border-radius: 5px;
+                    background-color: rgba(255, 255, 255, 0.6);
+                    
+                }
 
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
+                a {
+                    text-decoration:none;
+                    color: black;
+                }
 
-        input[type="text"],
-        input[type="date"],
-        input[type="number"],
-        select {
-            width: 90%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 15px;
-        }
+                #search {
+                    position: absolute; 
+                    top: 40%; 
+                    left: 50%;
+                    font-size: 18px;
+                    width: 56px;
+                    height: 36px; 
+                    background-color:aquamarine; 
+                    border: none; 
+                    border-radius: 5px;
+                }
 
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-    </style>
-</head>
-<body>
-    <div class="menubar">
-        <div class="left-menu">
-            <a href="{{ url_for('index') }}">首頁</a>
-            <a href="{{ url_for('search_price') }}">國內機票比價</a>
+                
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="navbar">
+                <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/flights.png">
+                <p>AirHunter</p>
+                <nav style="margin-left: 0">
+                    <ul>
+                        <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
+                        <li><a href="{{ url_for('price_graph') }}">看趨勢</a></li>
+                    </ul>
+                </nav>
+                <nav>
+                    <ul>
+                        {% if current_user.is_authenticated %}
+                        <li><a href="{{ url_for('member') }}">會員專區</a></li>
+                        <li><a href="{{ url_for('logout') }}">登出</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('login') }}">登入</a></li>
+                        <li><a href="{{ url_for('register') }}">註冊</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div> 
         </div>
-        <div class="right-menu">
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('member') }}">會員專區</a><a href="{{ url_for('logout') }}">登出</a>
-            {% else %}
-            <a href="{{ url_for('login') }}">登入</a><a href="{{ url_for('register') }}">註冊</a>
-            {% endif %}
+        {% with messages = get_flashed_messages() %}
+        {% if messages %}
+        {% for message in messages %}
+                <p align="center" style="color:#007bff;">{{ message }}</p>
+        {% endfor %}
+        {% endif %}
+        {% endwith %} 
+        <div class="background-container">
+            <div class="wallpaper">
+                <p class="title">出發！開始你的旅程</p>
+                <div class="search-box">
+                    <form action="{{ url_for('get_flight_lists') }}" method="GET">
+                        <div class="first-raw" id="scheduleSelect" style="display: flex; padding: 10px; justify-content: left;">
+                            <div>
+                                <label>國內</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="one-way-btn" name="schedule" value="oneWay" checked="true">
+                                <label for="one-way">單程</label>
+                            </div>
+                            <div>
+                                <input type="radio" id="return-btn" name="schedule" value="return">
+                                <label for="return">來回</label>
+                            </div>
+                            
+                        </div>
+                        <div class="second-raw" style="display: flex; padding: 10px; justify-content: left;">
+                            <div style="margin: 5px;">
+                                <label for="from">出發地</label></br>
+                                <select class="from-to" id="from-selector" name="departureAirports" required>
+                                    <option value="">請選擇</option>
+                                    <option value="TSA">台北松山機場 TSA</option>
+                                    <option value="KHH">高雄小港國際機場 KHH</option>
+                                    <option value="HUN">花蓮機場 HUN</option>
+                                    <option value="TTT">台東豐年機場 TTT</option>
+                                    <option value="TNN">台南機場 TNN</option>
+                                    <option value="RMQ">台中清泉崗機場 RMQ</option>
+                                    <option value="CYI">嘉義水上機場 CYI</option>
+                                    <option value="MZG">澎湖機場 MZG</option>
+                                    <option value="KNH">金門尚義機場 KNH</option>
+                                    <option value="MFK">馬祖(北竿)機場 MFK</option>
+                                    <option value="LZN">馬祖(南竿)機場 LZN</option>
+                                </select>
+                            </div>
+                            <div style="margin: 5px;">
+                                <label for="to">目的地</label></br>
+                                <select class="from-to" id="to-selector" name="arriveAirports" required>
+                                </select>
+                            </div>
+                            <div style="margin: 5px;">
+                                <label for="depart_date">去程</label></br>
+                                <input type="date" id="depart_date" name="departureDates" required>
+                            </div>
+                            <div style="margin: 5px;"> 
+                                <label for="return_date" id="returnDateLabel" style="display: none;">回程</label></br>
+                                <input type="date" id="return_date" name="returnDates" style="display: none;">
+                            </div>   
+                            <div style="position: relative;">
+                                <button type="submit" id="search">搜尋</button> 
+                            </div> 
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>  
+        <div class="recommend-container" style="margin-left: 70px; margin-right: 70px;">
+            <h1 >連假出遊最佳選～機票優惠區</h1>
+            <div class="raw-one" style="display: flex; justify-content: space-between;">
+                <div class="recommend-item" style="align-items: center;">
+                    <p style="font-size: 20px;">台北-高雄</p>
+                    <p>$ 359</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+                <div class="recommend-item">
+                    <p style="font-size: 20px;">台北-澎湖</p>
+                    <p>$ 2678</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+                <div class="recommend-item">
+                    <p style="font-size: 20px;">台北-花蓮</p>
+                    <p>$ 888</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+            </div>
+           <div class="raw-two" style="display: flex; justify-content: space-between;">
+                <div class="recommend-item">
+                    <p style="font-size: 20px;">台北-台東</p>
+                    <p>$ 999</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+                <div class="recommend-item">
+                    <p style="font-size: 20px;">台北-金門</p>
+                    <p>$ 666</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+                <div class="recommend-item">
+                    <p style="font-size: 20px;">台北-馬祖</p>
+                    <p>$ 888</p>
+                    <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/raphael-yang-huZaUpa6boU-unsplash-2.jpg" style="height: 300px; width: 300px;">
+                </div>
+           </div>
         </div>
-    </div>
-    <h1>國內機票比價✈️</h1>
-    <form action="{{ url_for('get_flight_lists') }}" method="GET">
-        <label for="schedule">行程</label>
-        <select name="schedule" id="scheduleSelect">
-            <option value="oneWay" selected>單程</option>
-            <option value="return">來回</option>
-        </select><br>
-
-        <label for="from">出發地</label>
-        <input type="text" id="from" name="departureAirports" required><br>
-
-        <label for="to">目的地</label>
-        <input type="text" id="to" name="arriveAirports" required><br>
-
-        <label for="depart_date">出發日期</label>
-        <input type="date" id="depart_date" name="departureDates" required><br>
-
-        <label for="return_date" id="returnDateLabel" style="display: none;">回程日期：</label>
-        <input type="date" id="return_date" name="returnDates" style="display: none;"><br>
-
-
-        <button type="submit">搜尋</button>
-    </form>
-    <script>
-        const scheduleSelect = document.getElementById('scheduleSelect');
-        const returnDateLabel = document.getElementById('returnDateLabel');
-        const returnDateInput = document.getElementById('return_date');
-    
-        scheduleSelect.addEventListener('change', function () {
-            if (scheduleSelect.value === 'return') {
-                returnDateLabel.style.display = 'block';
-                returnDateInput.style.display = 'block';
-            } else {
-                returnDateLabel.style.display = 'none';
-                returnDateInput.style.display = 'none';
-            }
-        });
+        <script>
+            const oneWayBtn = document.getElementById('one-way-btn');
+            const returnBtn = document.getElementById('return-btn');
+            const returnDateLabel = document.getElementById('returnDateLabel');
+            const returnDateInput = document.getElementById('return_date');
         
-    </script>
-</body>
+            scheduleSelect.addEventListener('change', function () {
+                if (returnBtn.checked) {
+                    returnDateLabel.style.display = '';
+                    returnDateInput.style.display = '';
+                } else if (oneWayBtn.checked) {
+                    returnDateLabel.style.display = 'none';
+                    returnDateInput.style.display = 'none';
+                }
+                else {
+                    returnDateLabel.style.display = 'none';
+                    returnDateInput.style.display = 'none';
+                }
+            });
+
+            const fromSelect = document.getElementById('from-selector');
+            const toSelect = document.getElementById('to-selector');
+
+            // 定義不同類別對應的子類別選項
+            const fromOptions = {
+                'TSA': ['台東豐年機場 TTT', '澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH', '馬祖(北竿)機場 MFK', '馬祖(南竿)機場 LZN'],
+                'KHH': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+                'HUN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '高雄小港國際機場 KHH'],
+                'TTT': ['台北松山機場 TSA'],
+                'TNN': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+                'RMQ': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+                'CYI': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+                'MZG': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '金門尚義機場 KNH', '高雄小港國際機場 KHH'],
+                'KNH': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '澎湖機場 MZG', '高雄小港國際機場 KHH'],
+                'MFK': ['台北松山機場 TSA'],
+                'LZN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA']
+            };
+
+            // 當選擇框中的選擇改變時，更新第二個選擇框的選項
+            fromSelect.addEventListener('change', () => {
+                console.log("change")
+                const fromSelectCategory = fromSelect.value;
+                const toSelectOptions = fromOptions[fromSelectCategory] || [];
+
+                // 清空第二個選擇框的內容
+                toSelect.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = "請選擇";
+                toSelect.appendChild(defaultOption);
+                // 將新的選項填充到第二個選擇框中
+                toSelectOptions.forEach((option) => {
+                    const newOption = document.createElement('option');
+                    newOption.textContent = option;
+                    newOption.value = option.slice(-3);
+                    toSelect.appendChild(newOption);
+                });
+            });
+        </script>
+       
+    </body>
+
 </html>

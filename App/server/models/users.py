@@ -32,33 +32,24 @@ def get_user_name(account):
 
 class UserFavorite(db.Model):
     __tablename__ = 'user_favorites'
-    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key = True,  nullable=False)
-    go_arrive_airport_code = db.Column(db.String(3),primary_key = True, nullable=False)
-    go_arrive_time = db.Column(db.DateTime(), primary_key = True, nullable=False)
-    go_depart_airport_code = db.Column(db.String(3), primary_key = True, nullable=False)
-    go_depart_time = db.Column(db.DateTime(), primary_key = True, nullable=False)
-    back_arrive_airport_code = db.Column(db.String(3))
-    back_arrive_time = db.Column(db.DateTime())
-    back_depart_airport_code = db.Column(db.String(3))
-    back_depart_time = db.Column(db.DateTime())
-    price = db.Column(db.Integer, nullable=False)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), primary_key = True)
+    depart_airport_code = db.Column(db.String(3),primary_key = True)
+    arrive_airport_code = db.Column(db.String(3), primary_key = True)
+    depart_date = db.Column(db.DateTime(), primary_key=True)
+    return_date = db.Column(db.DateTime(), primary_key=True)
+    schedule = db.Column(db.String(20), primary_key=True)
+    min_price = db.Column(db.Integer)
     active = db.Column(db.Boolean)
 
-    def __init__(self, user_id, go_arrive_airport_code, 
-                 go_arrive_time, go_depart_airport_code, 
-                 go_depart_time, back_arrive_airport_code, 
-                 back_arrive_time, back_depart_airport_code, 
-                 back_depart_time, price, active=True):
+    def __init__(self, user_id, depart_airport_code, arrive_airport_code,
+                 depart_date, return_date, schedule, min_price, active=True):
         self.user_id = user_id
-        self.go_arrive_airport_code = go_arrive_airport_code
-        self.go_arrive_time = go_arrive_time
-        self.go_depart_airport_code = go_depart_airport_code
-        self.go_depart_time = go_depart_time
-        self.back_arrive_airport_code = back_arrive_airport_code
-        self.back_arrive_time = back_arrive_time
-        self.back_depart_airport_code = back_depart_airport_code
-        self.back_depart_time = back_depart_time
-        self.price = price
+        self.depart_airport_code = depart_airport_code
+        self.arrive_airport_code = arrive_airport_code
+        self.depart_date = depart_date
+        self.return_date = return_date
+        self.schedule = schedule
+        self.min_price = min_price
         self.active = active
 
 
@@ -66,14 +57,12 @@ def create_user_fav(data):
     """
         insert a record into user_favorites table, if it already exist, set active to True
         parameter shoule be dictionary with key='user_id', 'arrive_airport_code', 
-                 'arrive_time', 'depart_airport_code', 'depart_time', 'price'
+                 'depart_airport_code', 'depart_date', 'return_date', 'schedule', 'min_price'
     """
     db.session.commit()
-    query = UserFavorite.query.filter_by(user_id = data['user_id'],go_arrive_airport_code=data['go_arrive_airport_code'],
-                                         go_arrive_time = data['go_arrive_time'], go_depart_airport_code=data['go_depart_airport_code'],
-                                         go_depart_time = data['go_depart_time'],back_arrive_airport_code=data['back_arrive_airport_code'],
-                                         back_arrive_time = data['back_arrive_time'], back_depart_airport_code=data['back_depart_airport_code'],
-                                         back_depart_time = data['back_depart_time']).first()
+    query = UserFavorite.query.filter_by(user_id = data['user_id'],depart_airport_code=data['depart_airport_code'],
+                                         arrive_airport_code = data['arrive_airport_code'], depart_date=data['depart_date'],
+                                         return_date = data['return_date'], schedule=data['schedule']).first()
     if not query:
         user_fav_model = UserFavorite(**data) 
         db.session.add(user_fav_model)
@@ -90,11 +79,10 @@ def del_user_fav(data):
                  'arrive_time', 'depart_airport_code', 'depart_time'
     """
     db.session.commit()
-    query = UserFavorite.query.filter_by(user_id = data['user_id'],go_arrive_airport_code=data['go_arrive_airport_code'],
-                                         go_arrive_time = data['go_arrive_time'], go_depart_airport_code=data['go_depart_airport_code'],
-                                         go_depart_time = data['go_depart_time'],back_arrive_airport_code=data['back_arrive_airport_code'],
-                                         back_arrive_time = data['back_arrive_time'], back_depart_airport_code=data['back_depart_airport_code'],
-                                         back_depart_time = data['back_depart_time'])
+    query = UserFavorite.query.filter_by(user_id = data['user_id'],depart_airport_code=data['depart_airport_code'],
+                                         arrive_airport_code = data['arrive_airport_code'], depart_date=data['depart_date'],
+                                         return_date = data['return_date'], schedule=data['schedule'])
+    
     query.update({"active": False})
     db.session.commit()
 
@@ -106,25 +94,18 @@ def get_user_fav(userID):
     """
     db.session.commit()
     query = UserFavorite.query.filter_by(user_id = userID, active=True).all()
-    
     fav_list = []
     for item in query:
         fav = {}
-        fav["go_arrive_airport"] = get_airport_detail(item.go_arrive_airport_code)['airport_name']
-        fav["go_arrive_airport_code"] = item.go_arrive_airport_code
-        fav["go_arrive_time"] = item.go_arrive_time.strftime("%Y-%m-%d %H:%M")
-        fav["go_depart_airport"] = get_airport_detail(item.go_depart_airport_code)['airport_name']
-        fav["go_depart_airport_code"] = item.go_depart_airport_code
-        fav["go_depart_time"] = item.go_depart_time.strftime("%Y-%m-%d %H:%M")
-        if item.back_arrive_airport_code:
-            fav["back_arrive_airport"] = get_airport_detail(item.back_arrive_airport_code)['airport_name']
-            fav["back_arrive_airport_code"] = item.back_arrive_airport_code
-            fav["back_arrive_time"] = item.back_arrive_time.strftime("%Y-%m-%d %H:%M")
-            fav["back_depart_airport"] = get_airport_detail(item.back_depart_airport_code)['airport_name']
-            fav["back_depart_airport_code"] = item.back_depart_airport_code
-            fav["back_depart_time"] = item.back_depart_time.strftime("%Y-%m-%d %H:%M")
-            fav["schedule"] = "return"
-        else:
-            fav["schedule"] = "oneWay"
+        fav["depart_city"] = get_airport_detail(item.depart_airport_code)['city_name']
+        fav["arrive_city"] = get_airport_detail(item.arrive_airport_code)['city_name']
+        fav["depart_airport_code"] = item.depart_airport_code
+        fav["arrive_airport_code"] = item.arrive_airport_code
+        fav["depart_date_formatted"] = item.depart_date.strftime("%Y年%m月%d日")
+        fav["depart_date"] = item.depart_date.strftime("%Y-%m-%d")
+        fav["schedule"] = item.schedule
+        fav["return_date_formatted"] = item.return_date.strftime("%Y年%m月%d日") if item.schedule == "return" else None
+        fav["return_date"] = item.return_date.strftime("%Y-%m-%d") if item.schedule == "return" else None
+        fav["min_price"] = item.min_price
         fav_list.append(fav)
     return fav_list
