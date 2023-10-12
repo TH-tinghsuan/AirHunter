@@ -64,7 +64,7 @@ def clean_and_insert_to_rds(**kwargs):
     else:
         print("No data to inset to RDS.")
 
-@dag(start_date=datetime.today(), schedule_interval=timedelta(seconds=10), tags=['data_pipeline'])
+@dag(start_date=datetime(2023, 10, 1), catchup=False, schedule_interval=timedelta(seconds=30), tags=['data_pipeline'])
 def clean_dag():
     start_task = EmptyOperator(task_id=TaskID.start_task_id)
 

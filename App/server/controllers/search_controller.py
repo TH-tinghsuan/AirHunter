@@ -5,6 +5,8 @@ from server.controllers.agent_url import get_url_ezFly, get_url_ezTravel_oneWay,
 from dash import html, dcc
 import plotly.express as px
 import json
+from server.models.track import get_price_trend, get_price_record, get_price_change_data, get_map_data
+from server.models.flight import get_airport_detail
 
 @app.route("/")
 def index(): 
@@ -18,16 +20,53 @@ def home():
 def price_graph():
     if request.args.get("depart") and request.args.get("arrive"):
         depart_at = request.args.get("depart").upper()
+        depart_city = get_airport_detail(depart_at)['city_name']
         arrive_at = request.args.get("arrive").upper()
+        arrive_city = get_airport_detail(arrive_at)['city_name']
         df = get_price_df(depart_at, arrive_at)
-        if df.empty != True:
+        df2 = get_price_trend(depart_at, arrive_at)
+        df3 = get_price_record(depart_at, arrive_at)
+        if df.empty != True and df2.empty != True and df3.empty != True :
             fig = px.line(df, x='日期', y= '平均價格', color='旅行社')
             fig.update_xaxes(rangeslider_visible=True)
-            fig.update_layout(title=f"{depart_at} - {arrive_at} 機票平均價格")
-            dash_app.layout = html.Div([                            
+
+            fig2 = px.bar(df2, x='出發日', y= '最低價格')
+
+            fig3 = px.line(df3, x='資料時間', y= '最低價格')
+
+            dash_app.layout = html.Div([html.Div([
+                                          html.Div([
+                                              html.H2(children=f"{depart_city} - {arrive_city} 機票平均價格",
+                                                        style={
+                                                            'textAlign': 'center',
+                                                            'color': '#FFFFF',
+                                                            'backgroundColor': '#00000'
+                                                        }), 
+                                              dcc.Graph(id = 'avg-price-chart', figure=fig)]
+                                              )]),  
+                                        
                                         html.Div([
-                                            dcc.Graph(id = 'line=chart', figure=fig)])
-                                        ], style={'border': '1px solid #ccc', 'padding': '10px', 'width': '80%', 'margin': 'auto'})
+                                          html.Div([
+                                              html.H2(children=f"{depart_city} - {arrive_city} 票價趨勢",
+                                                        style={
+                                                            'textAlign': 'center',
+                                                            'color': '#FFFFF',
+                                                            'backgroundColor': '#00000'
+                                                        }), 
+                                              dcc.Graph(id = 'price-trend-chart', figure=fig2)]
+                                             )]),
+                                        
+                                        html.Div([
+                                          html.Div([
+                                              html.H2(children=f"{depart_city} - {arrive_city} 歷史票價",
+                                                        style={
+                                                            'textAlign': 'center',
+                                                            'color': '#FFFFF',
+                                                            'backgroundColor': '#00000'
+                                                        }), 
+                                              dcc.Graph(id = 'price-history-chart', figure=fig3)]
+                                              )]), 
+                                        ], style={'padding': '10px', 'width':'60%', 'margin-left': '20%', 'margin-right': '20%'})
             dash_html = dash_app.index()
             return render_template("dashboard.html", dash_html=dash_html)
         else:
@@ -90,5 +129,20 @@ def get_agent_url():
         return "Bad request", 404
 
 
+@app.route("/price/change/get", methods=["get"])
+def get_price_change():
+    data = get_price_change_data()
+    if data:
+        return json.dumps(data, ensure_ascii=False)
+    else:
+        json_data = {"data": None}
+        return json.dumps(json_data, ensure_ascii=False)
 
-    
+@app.route("/map/get", methods=["get"])
+def get_map():
+    data = get_map_data()
+    if data:
+        return json.dumps(data, ensure_ascii=False)
+    else:
+        json_data = {"data": None}
+        return json.dumps(json_data, ensure_ascii=False)

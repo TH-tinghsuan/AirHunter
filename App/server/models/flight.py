@@ -1,19 +1,11 @@
 from server import db
 from sqlalchemy.sql import func
 import pandas as pd
-
-class Batch_version(db.Model):
-    __tablename__ = "batch_version"
-    version = db.Column(db.String(20), primary_key=True)
-    region = db.Column(db.String(20))
-
-    def __init__(self, version, region):
-        self.version = version
-        self.region = region
+from datetime import datetime, timedelta
 
 
-class Flights_domestic(db.Model):
-    __tablename__= "flights_domestic"
+class FlightsDomestic(db.Model):
+    __tablename__= "flights_domestic_main"
     arrive_airport_code = db.Column(db.String(3), primary_key=True, nullable=False)
     arrive_time = db.Column(db.DateTime(), nullable=False)
     depart_airport_code = db.Column(db.String(3), primary_key=True, nullable=False)
@@ -23,12 +15,12 @@ class Flights_domestic(db.Model):
     flightCode = db.Column(db.String(10), primary_key=True, nullable=False)
     price = db.Column(db.Integer)
     agentName = db.Column(db.String(20), primary_key=True, nullable=False)
-    batch_version = db.Column(db.String(20), primary_key=True, nullable=False)
+    search_date = db.Column(db.DateTime(), primary_key=True, nullable=False)
     created_at = db.Column(db.TIMESTAMP(), server_default = func.now())
 
     def __init__(self, arrive_airport_code, arrive_time, 
                  depart_airport_code, depart_time, clsType, airlineName,
-                 flightCode, price, batch_version, created_at):
+                 flightCode, price, search_date, created_at):
         self.arrive_airport_code = arrive_airport_code
         self.arrive_time = arrive_time
         self.depart_airport_code = depart_airport_code
@@ -37,7 +29,7 @@ class Flights_domestic(db.Model):
         self.airlineName = airlineName
         self.flightCode = flightCode
         self.price = price
-        self.batch_version = batch_version
+        self.search_date = search_date
         self.created_at = created_at
 
 class Airline(db.Model):
@@ -58,19 +50,14 @@ class Airport(db.Model):
     IATA_code = db.Column(db.String(3), primary_key=True, nullable=False)
     city_name = db.Column(db.String(10), nullable=False)
     city_ID = db.Column(db.String(3), nullable=False)
-
-    def __init__(self, airport_name, IATA_code, city_name, city_ID):
+    image = db.Column(db.String(200))
+    def __init__(self, airport_name, IATA_code, city_name, city_ID, image):
         self.airport_name = airport_name
         self,IATA_code = IATA_code
         self.city_name = city_name
         self.city_ID = city_ID
+        self.image = image
     
-
-def get_batch_version(region):
-    db.session.commit()
-    query = Batch_version.query.filter_by(region=region)
-    return query[0].version
-
 
 def get_airline_detail(airlineName):
     db.session.commit()
@@ -81,37 +68,61 @@ def get_airline_detail(airlineName):
 def get_airport_detail(airport_code):
     db.session.commit()
     query = Airport.query.filter_by(IATA_code=airport_code)
-    airport_info = {"airport_name": query[0].airport_name, "IATA_code": query[0].IATA_code, "city_name": query[0].city_name, "city_ID": query[0].city_ID}
+    airport_info = {"airport_name": query[0].airport_name, "IATA_code": query[0].IATA_code, "city_name": query[0].city_name, "city_ID": query[0].city_ID, "image": query[0].image}
     return airport_info
+
+def get_utc_8_date():
+    utc_date = datetime.utcnow()
+    utc_8_date = utc_date + timedelta(hours=8)
+    formatted_date = utc_8_date.strftime('%Y-%m-%d')
+    return formatted_date
+
+def check_data():
+    db.session.commit()
+    search_date = get_utc_8_date()
+    query = FlightsDomestic.query.filter(FlightsDomestic.search_date == search_date)
+    data = query.all()
+    if data:
+        return True
+    else:
+        return False
 
 
 def get_flights_info(search_arrive_airport_code, search_depart_airport_code, search_depart_time):
     db.session.commit()
-    newest_batch_version = get_batch_version("domestic")
+    check_if_exist_data = check_data()
+    if check_if_exist_data == True:
+         search_date = get_utc_8_date()
+    else:
+        date_str = get_utc_8_date()
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        search_date_obj = date_obj - timedelta(days=1)
+        search_date = search_date_obj.strftime('%Y-%m-%d')
+
     query = db.session.query(
-        Flights_domestic.arrive_time,
-        Flights_domestic.depart_time,
-        Flights_domestic.arrive_airport_code,
-        Flights_domestic.depart_airport_code,
-        func.group_concat(Flights_domestic.price).label('prices'),
-        func.group_concat(Flights_domestic.airlineName).label('airlineNames'),
-        func.group_concat(Flights_domestic.flightCode).label('flightCodes'),
-        func.group_concat(Flights_domestic.agentName).label('agentNames')
+        FlightsDomestic.arrive_time,
+        FlightsDomestic.depart_time,
+        FlightsDomestic.arrive_airport_code,
+        FlightsDomestic.depart_airport_code,
+        func.group_concat(FlightsDomestic.price).label('prices'),
+        func.group_concat(FlightsDomestic.airlineName).label('airlineNames'),
+        func.group_concat(FlightsDomestic.flightCode).label('flightCodes'),
+        func.group_concat(FlightsDomestic.agentName).label('agentNames')
     )
 
     query = query.filter(
-        Flights_domestic.arrive_airport_code == search_arrive_airport_code,
-        Flights_domestic.depart_airport_code == search_depart_airport_code,
-        func.DATE(Flights_domestic.depart_time) == search_depart_time,
-        Flights_domestic.batch_version == newest_batch_version,
-        Flights_domestic.price.isnot(None)
+        FlightsDomestic.arrive_airport_code == search_arrive_airport_code,
+        FlightsDomestic.depart_airport_code == search_depart_airport_code,
+        func.DATE(FlightsDomestic.depart_time) == search_depart_time,
+        FlightsDomestic.search_date == search_date,
+        FlightsDomestic.price.isnot(None)
     )
 
     query = query.group_by(
-        Flights_domestic.arrive_time,
-        Flights_domestic.depart_time,
-        Flights_domestic.arrive_airport_code,
-        Flights_domestic.depart_airport_code
+        FlightsDomestic.arrive_time,
+        FlightsDomestic.depart_time,
+        FlightsDomestic.arrive_airport_code,
+        FlightsDomestic.depart_airport_code
     )
 
     flight_info = query.all()
@@ -165,46 +176,52 @@ def search_result_to_dict(flight_info):
 
 def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, search_depart_time, search_return_time):
     db.session.commit()
-    newest_batch_version = get_batch_version("domestic")
-
+    check_if_exist_data = check_data()
+    if check_if_exist_data == True:
+         search_date = get_utc_8_date()
+    else:
+        date_str = get_utc_8_date()
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        search_date_obj = date_obj - timedelta(days=1)
+        search_date = search_date_obj.strftime('%Y-%m-%d')
     subquery_A = (
     db.session.query(
-        Flights_domestic.depart_airport_code.label('A_depart_airport_code'),
-        Flights_domestic.depart_time.label('A_depart_time'),
-        Flights_domestic.arrive_airport_code.label('A_arrive_airport_code'),
-        Flights_domestic.arrive_time.label('A_arrive_time'),
-        Flights_domestic.airlineName.label('A_airlineName'),
-        Flights_domestic.flightCode.label('A_flightCode'),
-        Flights_domestic.agentName.label('A_agentName'),
-        Flights_domestic.price.label('A_price')
+        FlightsDomestic.depart_airport_code.label('A_depart_airport_code'),
+        FlightsDomestic.depart_time.label('A_depart_time'),
+        FlightsDomestic.arrive_airport_code.label('A_arrive_airport_code'),
+        FlightsDomestic.arrive_time.label('A_arrive_time'),
+        FlightsDomestic.airlineName.label('A_airlineName'),
+        FlightsDomestic.flightCode.label('A_flightCode'),
+        FlightsDomestic.agentName.label('A_agentName'),
+        FlightsDomestic.price.label('A_price')
     )
     .filter(
-        Flights_domestic.batch_version == newest_batch_version,
-        func.DATE(Flights_domestic.depart_time) == search_depart_time,
-        Flights_domestic.depart_airport_code == search_depart_airport_code,
-        Flights_domestic.arrive_airport_code == search_arrive_airport_code,
-        Flights_domestic.price.isnot(None)
+        FlightsDomestic.search_date == search_date,
+        func.DATE(FlightsDomestic.depart_time) == search_depart_time,
+        FlightsDomestic.depart_airport_code == search_depart_airport_code,
+        FlightsDomestic.arrive_airport_code == search_arrive_airport_code,
+        FlightsDomestic.price.isnot(None)
     )
     .subquery()
     )
 
     subquery_B = (
     db.session.query(
-        Flights_domestic.depart_airport_code.label('B_depart_airport_code'),
-        Flights_domestic.depart_time.label('B_depart_time'),
-        Flights_domestic.arrive_airport_code.label('B_arrive_airport_code'),
-        Flights_domestic.arrive_time.label('B_arrive_time'),
-        Flights_domestic.airlineName.label('B_airlineName'),
-        Flights_domestic.flightCode.label('B_flightCode'),
-        Flights_domestic.agentName.label('B_agentName'),
-        Flights_domestic.price.label('B_price')
+        FlightsDomestic.depart_airport_code.label('B_depart_airport_code'),
+        FlightsDomestic.depart_time.label('B_depart_time'),
+        FlightsDomestic.arrive_airport_code.label('B_arrive_airport_code'),
+        FlightsDomestic.arrive_time.label('B_arrive_time'),
+        FlightsDomestic.airlineName.label('B_airlineName'),
+        FlightsDomestic.flightCode.label('B_flightCode'),
+        FlightsDomestic.agentName.label('B_agentName'),
+        FlightsDomestic.price.label('B_price')
     )
     .filter(
-        Flights_domestic.batch_version == newest_batch_version,
-        func.DATE(Flights_domestic.depart_time) == search_return_time,
-        Flights_domestic.depart_airport_code == search_arrive_airport_code,
-        Flights_domestic.arrive_airport_code == search_depart_airport_code,
-        Flights_domestic.price.isnot(None)
+        FlightsDomestic.search_date == search_date,
+        func.DATE(FlightsDomestic.depart_time) == search_return_time,
+        FlightsDomestic.depart_airport_code == search_arrive_airport_code,
+        FlightsDomestic.arrive_airport_code == search_depart_airport_code,
+        FlightsDomestic.price.isnot(None)
     )
     .subquery()
     )
@@ -289,20 +306,27 @@ def rt_search_result_to_dict(flight_info):
 
 def get_price_df(depart_at, arrive_at):
     db.session.commit()
-    newest_batch_version = get_batch_version("domestic")
+    check_if_exist_data = check_data()
+    if check_if_exist_data == True:
+         search_date = get_utc_8_date()
+    else:
+        date_str = get_utc_8_date()
+        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
+        search_date_obj = date_obj - timedelta(days=1)
+        search_date = search_date_obj.strftime('%Y-%m-%d')
     query = (
         db.session.query(
-            func.date(Flights_domestic.depart_time).label('depart_date'),
-            Flights_domestic.agentName.label('agentName'),
-            func.round(func.avg(Flights_domestic.price), 0).label('avg_price')
+            func.date(FlightsDomestic.depart_time).label('depart_date'),
+            FlightsDomestic.agentName.label('agentName'),
+            func.round(func.avg(FlightsDomestic.price), 0).label('avg_price')
         )
         .filter(
-            Flights_domestic.depart_airport_code == depart_at,
-            Flights_domestic.arrive_airport_code == arrive_at,
-            Flights_domestic.batch_version == newest_batch_version)
+            FlightsDomestic.depart_airport_code == depart_at,
+            FlightsDomestic.arrive_airport_code == arrive_at,
+            FlightsDomestic.search_date == search_date)
         .group_by(
-            func.date(Flights_domestic.depart_time),
-            Flights_domestic.agentName) 
+            func.date(FlightsDomestic.depart_time),
+            FlightsDomestic.agentName) 
         )
     results = query.all()
     data_list = []

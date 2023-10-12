@@ -54,11 +54,11 @@ def lifetour_scraper(start_date, total_dates):
             return data
         else:
             print("error, ", r.status_code)
-    batch_version = Variable.get("batch_version_key")    
+    search_date = Variable.get("search_date_key")    
     date_list = [start_date + timedelta(days=i) for i in range(total_dates)]
     for date in date_list:
         total = get_all_by_date(date, "%Y%m%d", get_json_file)
-        upload_to_s3(f"{date}_domestic_lifeTour_{batch_version}.json", json.dumps(total, ensure_ascii=False))
+        upload_to_s3(f"{date}_domestic_lifeTour_{search_date}.json", json.dumps(total, ensure_ascii=False))
 
 def richmond_crawler(start_date, total_dates):
     def get_flights_html(depart_from, arrive_at, depart_date):
@@ -70,11 +70,11 @@ def richmond_crawler(start_date, total_dates):
                 return data['flights_html']
         else:
             print("error, ", r.status_code)
-    batch_version = Variable.get("batch_version_key")
+    search_date = Variable.get("search_date_key") 
     date_list = [start_date + timedelta(days=i) for i in range(total_dates)]
     for date in date_list:
         total = get_all_by_date(date, "%Y-%m-%d", get_flights_html)
-        upload_to_s3(f"{date}_domestic_richmond_{batch_version}.json", json.dumps(total, ensure_ascii=False))
+        upload_to_s3(f"{date}_domestic_richmond_{search_date}.json", json.dumps(total, ensure_ascii=False))
 
 
 def ezTravel_crawler(start_date, total_dates):
@@ -105,11 +105,11 @@ def ezTravel_crawler(start_date, total_dates):
                 return data["data"]
         else:
             print("error, ", r.status_code)
-    batch_version = Variable.get("batch_version_key")    
+    search_date = Variable.get("search_date_key")  
     date_list = [start_date + timedelta(days=i) for i in range(total_dates)]
     for date in date_list:
         total = get_all_by_date(date, "%d/%m/%Y", get_json_data)
-        upload_to_s3(f"{date}_domestic_ezTravel_{batch_version}.json", json.dumps(total, ensure_ascii=False))
+        upload_to_s3(f"{date}_domestic_ezTravel_{search_date}.json", json.dumps(total, ensure_ascii=False))
 
 
 
@@ -142,8 +142,8 @@ def ezFly_crawler(start_date, total_dates):
                 return data_dict
         else:
             print("error." + response.status_code)
-    batch_version = Variable.get("batch_version_key")
+    search_date = Variable.get("search_date_key") 
     date_list = [start_date + timedelta(days=i) for i in range(total_dates)]
     for date in date_list:
         total = get_all_by_date(date, "%Y%m%d", get_html_data)
-        upload_to_s3(f"{date}_domestic_ezFly_{batch_version}.json", json.dumps(total, ensure_ascii=False))
+        upload_to_s3(f"{date}_domestic_ezFly_{search_date}.json", json.dumps(total, ensure_ascii=False))
