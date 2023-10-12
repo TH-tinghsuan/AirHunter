@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>歷史價格查詢</title>
+    <title>AirHunter | 票價趨勢查詢</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #e3e8eb;
+            background-color:#f2f2f2;
             margin: 0;
             padding: 0;
         }
@@ -17,11 +17,15 @@
                     padding-left: 2%;
                     padding-right: 2%;
                     background-color:white;
-                    border-bottom: solid 0.5px black;
                 }
                 .navbar {
                     display: flex;
                     align-items: center;
+                }
+
+                ul > li > a {
+                    font-size: 18px;
+                    color: dimgrey;
                 }
 
                 nav {
@@ -62,6 +66,66 @@
             border-radius: 5px;
         }
 
+        .from-to {
+                    padding: 10px;
+                    margin-bottom: 10px;
+                    border: 1px solid #ccc;
+                    border-radius: 5px;
+                    font-size: 15px;
+                    width: 200px;
+                }
+
+        #condition {
+            display: flex;
+            margin-left: 20%;
+        }
+
+        #avg-price-chart ,
+        #price-trend-chart,
+        #price-history-chart{
+            border-radius: 20px;
+            margin: 10px;
+            box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.2);
+            padding: 10px;
+            width: 100%;
+            margin: auto;
+            background-color: white;
+        }
+
+        #search  {
+            background-color: cornflowerblue;
+            color: white;
+            border: none; 
+            border-radius: 5px;
+            font-size: 20px;
+            width: 50px;
+            height: 25px;
+            padding: 0;
+        }
+
+        #footer {
+                    position: relative; 
+                    bottom: 0; 
+                    left: 0; 
+                    background-color: #333;
+                }
+
+                .copy-right > p {
+                    margin-bottom: 0;
+                }
+                .web-info{
+                    margin-left: 20px; 
+                    padding: 20px; 
+                    display: in-line;
+                }
+
+                .web-info > a{
+                    color: white; 
+                    border: solid white 0.5px; 
+                    padding: 2px; 
+                    border-radius: 5px;
+                }
+
     </style>
 </head>
 <body>
@@ -88,24 +152,100 @@
             </nav>
         </div> 
     </div> 
-    <h1>機票價格時間趨勢圖</h1>
+    {% if dash_html %}
+    {% else %}
+        <h3 style="margin-left: 20%;">請輸入出發地及目的地，以為您查詢價格趨勢。</h3>
+    {% endif %}
     <form id="condition" action="{{ url_for('price_graph') }}" method="get">
-        <label for="depart">出發地</label>
-        <input type="text" id="from" name="depart" required>
-        <label for="arrive">目的地</label>
-        <input type="text" id="to" name="arrive" required>
-        <button type="submit">查詢</button>
+        <div style="margin: 5px;">
+            <label for="from">出發地</label></br>
+            <select class="from-to" id="from-selector" name="depart" required>
+                <option value="">請選擇</option>
+                <option value="TSA">台北松山機場 TSA</option>
+                <option value="KHH">高雄小港國際機場 KHH</option>
+                <option value="HUN">花蓮機場 HUN</option>
+                <option value="TTT">台東豐年機場 TTT</option>
+                <option value="TNN">台南機場 TNN</option>
+                <option value="RMQ">台中清泉崗機場 RMQ</option>
+                <option value="CYI">嘉義水上機場 CYI</option>
+                <option value="MZG">澎湖機場 MZG</option>
+                <option value="KNH">金門尚義機場 KNH</option>
+                <option value="MFK">馬祖(北竿)機場 MFK</option>
+                <option value="LZN">馬祖(南竿)機場 LZN</option>
+            </select>
+        </div>
+        <div style="margin: 5px;">
+            <label for="to">目的地</label></br>
+            <select class="from-to" id="to-selector" name="arrive" required>
+            </select>
+        </div>
+        <div style="padding-top: 40px;">
+            <button type="submit" id="search">搜尋</button> 
+        </div> 
     </form>
     {% if dash_html %}
         <div id="dash-content">
             {{ dash_html|safe }}
         </div>
+    {% else %}
+        <div style="margin: 40%;">
+
+        </div>    
     {% endif %}
     {% if text %}
         <div id="dash-content">
             <p style="text-align: center">{{ text }}</p>
         </div>
     {% endif %}
-    
+    <footer id="footer" style="margin-top: 50px;">
+        <div class="web-info">
+            <p style="color: white;">Contact me</p>
+            <a href="https://github.com/TH-tinghsuan">Github</a>
+            <a href="">Linkedin</a>
+        </div>
+        <div class="copy-right">
+            <p style="color: white;">© 2023 AirHunter All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        const fromSelect = document.getElementById('from-selector');
+            const toSelect = document.getElementById('to-selector');
+
+            // 定義不同類別對應的子類別選項
+            const fromOptions = {
+                'TSA': ['台東豐年機場 TTT', '澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH', '馬祖(北竿)機場 MFK', '馬祖(南竿)機場 LZN'],
+                'KHH': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+                'HUN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '高雄小港國際機場 KHH'],
+                'TTT': ['台北松山機場 TSA'],
+                'TNN': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+                'RMQ': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+                'CYI': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+                'MZG': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '金門尚義機場 KNH', '高雄小港國際機場 KHH'],
+                'KNH': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '澎湖機場 MZG', '高雄小港國際機場 KHH'],
+                'MFK': ['台北松山機場 TSA'],
+                'LZN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA']
+            };
+
+            // 當選擇框中的選擇改變時，更新第二個選擇框的選項
+            fromSelect.addEventListener('change', () => {
+                console.log("change")
+                const fromSelectCategory = fromSelect.value;
+                const toSelectOptions = fromOptions[fromSelectCategory] || [];
+
+                // 清空第二個選擇框的內容
+                toSelect.innerHTML = '';
+                const defaultOption = document.createElement('option');
+                defaultOption.textContent = "請選擇";
+                toSelect.appendChild(defaultOption);
+                // 將新的選項填充到第二個選擇框中
+                toSelectOptions.forEach((option) => {
+                    const newOption = document.createElement('option');
+                    newOption.textContent = option;
+                    newOption.value = option.slice(-3);
+                    toSelect.appendChild(newOption);
+                });
+            });
+
+    </script>
 </body>
 </html>
