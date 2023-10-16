@@ -98,7 +98,6 @@ def get_flights_info(search_arrive_airport_code, search_depart_airport_code, sea
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         search_date_obj = date_obj - timedelta(days=1)
         search_date = search_date_obj.strftime('%Y-%m-%d')
-
     query = db.session.query(
         FlightsDomestic.arrive_time,
         FlightsDomestic.depart_time,
@@ -145,6 +144,11 @@ def calcuate_duration(start_time, end_time):
         return f"{hours} 小時 {minutes} 分鐘"
     return f"{days} 天 {hours} 小時 {minutes} 分鐘"
 
+def get_non_empty_value(lst):
+    for item in lst:
+        if item != "":
+            return item
+    return None
 
 def search_result_to_dict(flight_info):
     total = []
@@ -156,7 +160,8 @@ def search_result_to_dict(flight_info):
         return_json['depart_airport'] = get_airport_detail(item.depart_airport_code)
         return_json['arrive_time'] = item.arrive_time.strftime('%H:%M')
         return_json['arrive_airport'] = get_airport_detail(item.arrive_airport_code)
-        airlineName = item.airlineNames.split(",")[0]
+        airlineName_list = item.airlineNames.split(",")
+        airlineName = get_non_empty_value(airlineName_list)
         return_json["airline"] = airlineName
         ariline_detail = get_airline_detail(airlineName)
         return_json["flight_code"] = ariline_detail['airline_code'] +item.flightCodes.split(",")[0]
@@ -304,7 +309,8 @@ def rt_search_result_to_dict(flight_info):
         total.append(return_json)
     return sorted(total, key= lambda s: s["minPrice"])   
 
-def get_price_df(depart_at, arrive_at):
+def get_price_df():
+    print("get_price_df")
     db.session.commit()
     check_if_exist_data = check_data()
     if check_if_exist_data == True:
@@ -318,21 +324,26 @@ def get_price_df(depart_at, arrive_at):
         db.session.query(
             func.date(FlightsDomestic.depart_time).label('depart_date'),
             FlightsDomestic.agentName.label('agentName'),
-            func.round(func.avg(FlightsDomestic.price), 0).label('avg_price')
+            func.round(func.avg(FlightsDomestic.price), 0).label('avg_price'), 
+            FlightsDomestic.depart_airport_code,
+            FlightsDomestic.arrive_airport_code
         )
         .filter(
-            FlightsDomestic.depart_airport_code == depart_at,
-            FlightsDomestic.arrive_airport_code == arrive_at,
-            FlightsDomestic.search_date == search_date)
+            FlightsDomestic.search_date == search_date,
+            FlightsDomestic.price != None)
         .group_by(
             func.date(FlightsDomestic.depart_time),
-            FlightsDomestic.agentName) 
-        )
+            FlightsDomestic.agentName,
+            FlightsDomestic.depart_airport_code,
+            FlightsDomestic.arrive_airport_code
+        ))
     results = query.all()
     data_list = []
     for item in results:
        data = {}
-       data["日期"] = item.depart_date
+       data['出發地'] = item.depart_airport_code
+       data['目的地'] = item.arrive_airport_code
+       data["出發日"] = item.depart_date
        data["平均價格"] = item.avg_price
        data["旅行社"] = item.agentName
        data_list.append(data)

@@ -2,6 +2,8 @@ from server import db, login_manager
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin
 from server.models.flight import get_airport_detail
+from datetime import datetime, timedelta
+
 bcrypt = Bcrypt()
 
 class User(db.Model, UserMixin):
@@ -86,14 +88,19 @@ def del_user_fav(data):
     query.update({"active": False})
     db.session.commit()
 
-
+def get_utc_8_date():
+    utc_date = datetime.utcnow()
+    utc_8_date = utc_date + timedelta(hours=8)
+    formatted_date = utc_8_date.strftime('%Y-%m-%d')
+    return formatted_date
 
 def get_user_fav(userID):
     """
         retrieve a user's favorite list by user ID.
     """
     db.session.commit()
-    query = UserFavorite.query.filter_by(user_id = userID, active=True).all()
+    today = get_utc_8_date()
+    query = UserFavorite.query.filter(UserFavorite.user_id == userID, UserFavorite.depart_date >= today, UserFavorite.active==True).all()
     fav_list = []
     for item in query:
         fav = {}

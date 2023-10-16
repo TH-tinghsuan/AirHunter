@@ -14,7 +14,6 @@ def format_date(date_string):
 
 def get_url_ezTravel_return(start_date, return_date, depart_at, return_at, d_flight_code, r_flight_code):
     """date format: %d/%m/%Y"""
-    
     url = "https://flight.eztravel.com.tw/apiv2/flight/list"
     formated_start_date = format_date(start_date)
     formated_return_date = format_date(return_date)
@@ -40,7 +39,7 @@ def get_url_ezTravel_return(start_date, return_date, depart_at, return_at, d_fli
                                 "ToCityCode":return_at,
                                 "FromAirportCode":"",
                                 "ToAirportCode":"",
-                                "ResourceType":"ct"}
+                                "ResourceType":"eztravel"}
                         }
     
     r = requests.post(url, json=depart_payload)
@@ -52,8 +51,13 @@ def get_url_ezTravel_return(start_date, return_date, depart_at, return_at, d_fli
             for i in item:
                 if i['flightKey'] == d_flight_code:
                     paras = i['seats'][0]['selectedFlightParas']
+                    r.close() 
                     break
-    r.close() 
+    else:
+        print(f"can't find depart flight code, request status code: {r.status_code}")
+        url = f"https://flight.eztravel.com.tw/booking?journeytype=2&departurecode={depart_at}&arrivalcode={return_at}&outbounddate={formated_start_date}&inbounddate={formated_return_date}&dport=&aport=&adults=1&children=0&infants=0&direct=false&cabintype=tourist&airline=&routeSearchToken=&resourceType=EzTravel"
+        return url
+   
 
     paras1 = json.loads(paras)
     payload_2 =  {"head":
@@ -133,10 +137,10 @@ def get_url_ezTravel_oneWay(depart_date, depart_at, arrive_at, flight_code):
     return url
 
 
-def get_url_ezFly(dp_ct_name, ar_ct_name, dp_date, rt_date=""):
+def get_url_ezFly(schedule, dp_ct_name, ar_ct_name, dp_date, rt_date):
     """date format: %Y%m%d"""
     guid_url = "https://ea.ezfly.com/ProdDAIR/Json/GetDataToken/"
-    if rt_date:
+    if schedule == "return":
         payload = { "trip":"RT", 
                     "ct_from":dp_ct_name,
                     "ct_from_name":dp_ct_name,
@@ -152,7 +156,7 @@ def get_url_ezFly(dp_ct_name, ar_ct_name, dp_date, rt_date=""):
                         "islands_O":0,
                         "s":"",
                         "o":""}
-    else:
+    elif schedule == "oneWay":
         payload = { "trip":"OW", 
                     "ct_from":dp_ct_name,
                     "ct_from_name":dp_ct_name,
@@ -173,21 +177,39 @@ def get_url_ezFly(dp_ct_name, ar_ct_name, dp_date, rt_date=""):
     if r.status_code == 200:
         data = r.json()
         guid = data["Guid"]
-        if rt_date:
+        if schedule == "return":
             url = f"https://ea.ezfly.com/ProdDAIR/inquiry/indexSearch/?Guid={guid}&trip=RT&ct_from={dp_ct_name}&ct_to={ar_ct_name}&dp_date={dp_date}&rt_date={rt_date}&adults=1&childs=0&olds=0&islands=0&islands_C=0&islands_O=0&s=&o=&AL=&Q=Q"
-        else:
+        elif schedule == "oneWay":
              url = f"https://ea.ezfly.com/ProdDAIR/inquiry/indexSearch/?Guid={guid}&trip=OW&ct_from={dp_ct_name}&ct_to={ar_ct_name}&dp_date={dp_date}&rt_date={rt_date}&adults=1&childs=0&olds=0&islands=0&islands_C=0&islands_O=0&s=&o=&AL=&Q=Q"
        
     else:
         url = f"https://ea.ezfly.com/ProdDAIR/inquiry/indexSearch/?trip=OW&ct_from={dp_ct_name}&ct_to={ar_ct_name}&dp_date={dp_date}&rt_date={rt_date}&adults=1&childs=0&olds=0&islands=0&islands_C=0&islands_O=0&s=&o=&AL=&Q=Q"
     return url
 
-def get_url_lifeTour(start_date, return_date, depart_at, return_at):
+def get_url_lifeTour(schedule, start_date, return_date, depart_at, return_at):
     formatted_start_date = start_date.replace("-", "")
     formatted_reurn_date = return_date.replace("-", "")
-    if return_date != "":
-        schedule = 1
-    else:
-        schedule = 0
-    url = f"https://flights.lifetour.com.tw/search?&trvaltype={schedule}&dep={depart_at}&arr={return_at}&godate={formatted_start_date}&backdate={formatted_reurn_date}&adt=1&chd=0&classcode=999&trans=false"
+
+    if schedule == "oneWay":
+        schedule_id = 0
+        formatted_reurn_date = ""
+    elif schedule == "return":
+        schedule_id = 1
+    
+    url = f"https://flights.lifetour.com.tw/search?&trvaltype={schedule_id}&dep={depart_at}&arr={return_at}&godate={formatted_start_date}&backdate={formatted_reurn_date}&adt=1&chd=0&classcode=999&trans=false"
+    return url
+
+def get_url_richmond(schedule, start_date, return_date, depart_at, return_at):
+    if schedule == "oneWay":
+        schedule_id = 1
+        return_date = ""
+    elif schedule == "return":
+        schedule_id = 2
+  
+    if depart_at == "TSA":
+        depart_at = "TPE"
+    elif return_at == "TSA":
+        return_at = "TPE"
+
+    url = f"https://www.travel4u.com.tw/flight/search/?trip={schedule_id}&dep_location_codes={depart_at}&arr_location_codes={return_at}&dep_location_types=2&arr_location_types=1&dep_dates={start_date}&return_date={return_date}&adult=1&child=0&cabin_class=2&is_direct_flight_only=True&exclude_budget_airline=False&target_page=1&order_by=0_1&transfer_count=&carriers=&search_key="
     return url

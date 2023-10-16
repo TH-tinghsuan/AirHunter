@@ -25,6 +25,11 @@
                     color: dimgrey;
                 }
 
+                ul > li > a:hover {
+                    font-size: 18px;
+                    color: grey;
+                }
+
                 nav {
                     margin-left: auto; 
                 }
@@ -33,15 +38,21 @@
                     margin-left: 15px;
                     list-style: none;   
                 }
-                img {
-                    height: 30px;
-                    width: 30px;
+                #logo-img {
+                    height: 33px;
+                    width: 158px;
                     padding: 5px;
                 }
                 a {
                     text-decoration:none;
                     color: black;
                 }
+
+            #direct-img {
+                height: 30px;
+                width: 30px;
+                padding: 5px;
+            }
 
 
             h1 {
@@ -74,6 +85,37 @@
                 margin: 0;
                 padding: 0 20px;
             }
+
+            .direct-btn {
+                margin: 5px; 
+                background-color:white; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            .direct-btn:hover {
+                margin: 5px; 
+                background-color: rgb(190, 236, 251); 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            .direct-btn:active {
+                margin: 5px; 
+                background-color: lightblue; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
             #airline-img {
                 height: 50px;
                 width: 60px;
@@ -82,11 +124,40 @@
             height: 100%;
             width: 100%;
             }
+
+            #favoriteBtn {
+                background-color:whitesmoke; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            #favoriteBtn:hover {
+                background-color:whitesmoke;
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                border: solid 1.5px blue;
+                color: blue; 
+                padding: 5px;
+            }
+            #favoriteBtn:active {
+                background-color:whitesmoke; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                color: blue; 
+                border: solid 2px blue;
+                padding: 5px;
+            }
+
             #footer {
-                    position: relative; 
-                    bottom: 0; 
-                    left: 0; 
-                    background-color: #333;
+                position: relative;
+                bottom: 0;
+                width: 100%;
+                background-color: #333;
                 }
 
                 .copy-right > p {
@@ -104,23 +175,46 @@
                     padding: 2px; 
                     border-radius: 5px;
                 }
+
+                #not-found-img {
+                    margin-left:30%; 
+                    margin-top:5%; 
+                    width:40%; 
+                    height:80%;
+                }
+
+                #not-found-img > img{
+                    width:100%; 
+                    height:100%;
+                }
+
+                #page-link{
+                   display: flex;
+                   justify-content: space-between;
+                }
+
+                #page-link > a > img{
+                   height: 20px;
+                   width: 20px;
+                }
+
         </style>
     </head>
     <body>
         <div class="container">
             <div class="navbar">
-                <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/flights.png">
-                <p>AirHunter</p>
+                <a href="/"><img id="logo-img" src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/new_logo.png"></a>
                 <nav style="margin-left: 0">
                     <ul>
                         <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
-                        <li><a href="{{ url_for('price_graph') }}">看趨勢</a></li>
+                        <li><a href="/dashboard">看趨勢</a></li>
+                        <li><a href="/user/favorites">票價追蹤</a></li>
                     </ul>
                 </nav>
                 <nav>
                     <ul>
                         {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('member') }}">會員專區</a></li>
+                        <li><a style="color: #333;">Hi, {{ current_user.username }}</a></li>
                         <li><a href="{{ url_for('logout') }}">登出</a></li>
                         {% else %}
                         <li><a href="{{ url_for('login') }}">登入</a></li>
@@ -134,6 +228,10 @@
         {% if flight_info %}
             {% if schedule == "oneWay" %}
             <div id="title" style="background-color: lightblue; max-width: 900px; margin: 20px auto; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                <div id="page-link">
+                    <a href="/search"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/undo.png"></a>
+                    <a href="/home"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/home.png"></a>
+                </div>
                 <div id="city_name">
                     <span style="font-size: 35px; font-weight:bold;">{{ depart["city_name"] }} - {{ arrive["city_name"] }}</span>
                     <span style="font-size: 20px; font-weight:bold;">單程</span>    
@@ -143,7 +241,7 @@
                 </div>
                 {% if current_user.is_authenticated %}
                     <div style="text-align: right;">
-                        <button id="favoriteBtn" style="background-color:whitesmoke; border-radius: 5px; text-align: center; font-size: 16px; color: black; padding: 5px;">
+                        <button id="favoriteBtn">
                             追蹤票價
                         </button>
                     </div>
@@ -182,7 +280,7 @@
                             </div>
                             <div id="min-price">
                                 <p style="font-weight:bold; margin: 0; padding-top: 15px;">
-                                    <a>NTD$ {{ item["minPrice"]}} 起</a>
+                                    <a>NTD$ {{ item["minPrice"]}} 起 ⌵</a>
                                 </p>
                             </div>
                         </div>
@@ -193,7 +291,7 @@
                                 <span style="margin-right: auto;">{{ i["agentName"]}}</span>
                                 <div>
                                     <span>NTD$ {{ i["price"] }} </span>
-                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["flight_code"] }}" style="margin: 5px; background-color:white; border-radius: 5px; text-align: center; font-size: 12px; color: black; padding: 5px;">前往</button>
+                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["flight_code"] }}">前往</button>
                                 </div>
                             </div>
                             {% endfor %}
@@ -204,6 +302,10 @@
             <!-- 來回 -->
             {% elif schedule == "return" %}
                 <div id="title" style="background-color: lightblue; max-width: 900px; margin: 20px auto; padding: 20px; border-radius: 5px;">
+                    <div id="page-link">
+                        <a href="/search"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/undo.png"></a>
+                        <a href="/home"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/home.png"></a>
+                    </div>
                     <div id="city_name">
                         <span style="font-size: 35px; font-weight:bold;">{{ depart["city_name"] }} - {{ arrive["city_name"] }}</span>
                         <span style="font-size: 20px; font-weight:bold;">來回</span>    
@@ -213,7 +315,7 @@
                     </div>
                     {% if current_user.is_authenticated %}
                     <div style="text-align: right;">
-                        <button id="favoriteBtn" style="background-color:whitesmoke; border-radius: 5px; text-align: center; font-size: 16px; color: black; padding: 5px;">
+                        <button id="favoriteBtn">
                             追蹤票價
                         </button>
                     </div>
@@ -283,7 +385,7 @@
                             </div>
                             <div id="min-price">
                                 <p style="font-weight:bold; margin: 0; padding-top: 15px;">
-                                    <a>NTD$ {{ item["minPrice"]}} 起</a>
+                                    <a>NTD$ {{ item["minPrice"]}} 起 ⌵</a>
                                 </p>
                             </div>
                         </div>
@@ -294,7 +396,7 @@
                                 <span style="margin-right: auto;">{{ i["agentName"]}}</span>
                                 <div>
                                     <span>NTD$ {{ i["price"] }} </span>
-                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["go_flight_info"]+"-"+item["back_flight_info"] }}" style="margin: 5px; background-color:white; border-radius: 5px; text-align: center; font-size: 12px; color: black; padding: 5px;">前往</button>
+                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["go_flight_info"]+"-"+item["back_flight_info"] }}">前往</button>
                                 </div>
                             </div>
                             {% endfor %}
@@ -303,9 +405,15 @@
                 {% endfor %}
             {% endif %}
         {% else %}
-        <div id="item">
-            <p style="text-align: center">沒有符合的結果</p>
-        </div>
+            {% if response_text %}
+                <div id="not-found-img">
+                    <img src="../static/not_found.png" alt="Bad request">
+                </div>
+            {% else %}
+                <div id="item">
+                    <p style="text-align: center">沒有符合的結果</p>
+                </div>
+            {% endif %}
         {% endif %}
         <footer id="footer" style="margin-top: 50px;">
             <div class="web-info">
@@ -326,8 +434,7 @@
     <script>
         var items = document.querySelectorAll('#item');
         items.forEach(function(item) {
-            var minPriceBtn = item.querySelector('#min-price'); 
-            minPriceBtn.addEventListener('click', function() {
+            item.addEventListener('click', function() {
                 var agentInfo = item.querySelector('#price-info'); 
                 if (agentInfo.style.display === 'block') {
                     agentInfo.style.display = 'none';
@@ -349,7 +456,7 @@
         direct_btn.forEach(function(button){
             button.addEventListener('click', function(){
                 $.blockUI({
-                            message: '<img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/plane.gif"> </br> <p>正在為您導向至旅行社....</p> ' ,
+                            message: '<img id="direct-img" src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/plane.gif"> </br> <p>正在為您導向至旅行社....</p> ' ,
                             css: {
                                 border: 'none',
                                 padding: '15px',
@@ -369,11 +476,12 @@
                         }, 10000);
                 var id = button.id.split("-")
                 var request_data;
-                if (returnDates != "") {
+                if (schedule === "return")  {
                     var agentName = id[0]
                     var d_flightCode = id[1]
                     var r_flight_code = id[2]
                     request_data = {
+                        schedule: schedule,
                         agent_name: agentName, 
                         start_date: departureDates, 
                         return_date: returnDates, 
@@ -383,10 +491,11 @@
                         r_flight_code: r_flight_code
                         }
                 }
-                else{
+                else if (schedule === "oneWay"){
                     var agentName = id[0]
                     var flightCode = id[1]
                     request_data = {
+                        schedule: schedule,
                         agent_name: agentName, 
                         start_date: departureDates, 
                         return_date: returnDates, 

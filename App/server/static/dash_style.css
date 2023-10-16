@@ -1,0 +1,132 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color:#f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+            box-sizing: border-box;
+            padding-left: 2%;
+            padding-right: 2%;
+            background-color:white;
+        }
+#left-nav{
+    margin-left: 0;
+}
+
+#right-nav{
+    margin-left: auto;
+}
+
+.navbar {
+    display: flex;
+    align-items: center;
+}
+
+ul > li > a {
+    font-size: 18px;
+    color: dimgrey;
+}
+
+nav {
+    margin-left: auto; 
+}
+nav ul li {
+    display: inline;
+    margin-left: 15px;
+    list-style: none;   
+}
+ul > li > a:hover {
+    font-size: 18px;
+    color: grey;
+}
+img {
+    height: 32px;
+    width: 158px;
+    padding: 5px;
+}
+a {
+    text-decoration:none;
+    color: black;
+}
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+
+
+#avg-price-chart ,
+#price-trend-chart,
+#price-history-chart{
+    border-radius: 20px;
+    margin: 10px;
+    box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.2);
+    padding: 10px;
+    width: 100%;
+    margin: auto;
+    background-color: white;
+}
+
+#date-selector {
+    display: flex;
+    margin-left: 2%;
+}
+
+#date-selector > p {
+    display: flex;
+    margin-left: 5px;
+    margin-right: 5px;
+}
+
+#spot-selector {
+    display: flex;
+    margin-top: 10px;
+}
+
+#depart-dropdown,
+#arrive-dropdown {
+    padding: 0;
+    margin-bottom: 10px;
+    border-radius: 5px;
+    font-size: 15px;
+    width: 200px;
+}
+
+.spot-container{
+    margin-left: 5px;
+}
+
+.spot-container > p{
+    margin: 0;
+}
+
+.SingleDatePickerInput__withBorder{
+    border-radius: 5px;
+    border: 1px solid white;
+}
+
+#footer {
+    position: relative;
+    bottom: 0;
+    width: 100%;
+    background-color: #333;
+    }
+
+.copy-right > p {
+    margin-bottom: 0;
+}
+.web-info{
+    margin-left: 20px; 
+    padding: 20px; 
+    display: in-line;
+}
+
+.web-info > a{
+    color: white; 
+    border: solid white 0.5px; 
+    padding: 2px; 
+    border-radius: 5px;
+}

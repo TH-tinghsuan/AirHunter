@@ -47,12 +47,10 @@ class PriceChange(db.Model):
         self.search_date= search_date
 
 #查特定出發地＋目的地在不同出發日的最低價格
-def get_price_trend(depart_at, arrive_at):
+def get_price_trend():
     db.session.commit()
     today_date = get_utc_8_date()
     query = PriceHistory.query.filter(
-                    PriceHistory.depart_airport_code == depart_at,
-                    PriceHistory.arrive_airport_code == arrive_at,
                     PriceHistory.depart_date >= today_date,
                     PriceHistory.search_date == today_date
                 )
@@ -60,6 +58,8 @@ def get_price_trend(depart_at, arrive_at):
     data_list = []
     for item in result:
         data = {}
+        data['出發地'] = item.depart_airport_code
+        data['目的地'] = item.arrive_airport_code
         data['出發日'] = item.depart_date
         data['最低價格'] = item.min_price
         data_list.append(data)
@@ -67,20 +67,17 @@ def get_price_trend(depart_at, arrive_at):
     return df
 
 #查歷史紀錄
-def get_price_record(depart_at, arrive_at):
+def get_price_record():
     db.session.commit()
-    depart_date = get_utc_8_date()
-    query = PriceHistory.query.filter(
-                    PriceHistory.depart_airport_code == depart_at,
-                    PriceHistory.arrive_airport_code == arrive_at,
-                    PriceHistory.depart_date == "2023-12-04"
-                )
-    result = query.all()
+    result = PriceHistory.query.all()
     data_list = []
     for item in result:
         data = {}
-        data['資料時間'] = item.search_date.date()
+        data['出發地'] = item.depart_airport_code
+        data['目的地'] = item.arrive_airport_code
+        data['搜尋時間'] = item.search_date.date()
         data['最低價格'] = item.min_price
+        data['出發日'] = item.depart_date
         data_list.append(data)
     df = pd.DataFrame.from_dict(data_list)
     return df
@@ -103,7 +100,7 @@ def get_price_change_data():
     db.session.commit()
     query = PriceChange.query.filter(
                     PriceChange.change_type == "drop",
-                    PriceChange.change_range > 50,
+                    PriceChange.change_range > 1,
                     PriceChange.search_date == search_date
                 )
     query = query.order_by(desc(PriceChange.change_range))
