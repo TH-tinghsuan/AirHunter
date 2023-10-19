@@ -1,20 +1,21 @@
 <!DOCTYPE html>
-<html>
-    <head>
-        <title>AirHunter</title>
-        <link rel="stylesheet" href="style.css">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <style>
-                body {
-                    margin: 0;
-                }
-                .container {
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirHunter | 機票比價</title>
+    <style>
+        body {
+                background-color: #f2f2f2;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
                     box-sizing: border-box;
                     padding-left: 2%;
                     padding-right: 2%;
                     background-color:white;
-                    margin-left: 20px;
-                    margin-right: 20px;
                 }
                 .navbar {
                     display: flex;
@@ -26,6 +27,11 @@
                     color: dimgrey;
                 }
 
+                ul > li > a:hover {
+                    font-size: 18px;
+                    color: grey;
+                }
+
                 nav {
                     margin-left: auto; 
                 }
@@ -35,47 +41,34 @@
                     list-style: none;   
                 }
                 img {
-                    height: 30px;
-                    width: 30px;
+                    height: 33px;
+                    width: 158px;
                     padding: 5px;
                 }
-
-                .background-container {
-                    position: relative; 
-                    width: 100%;
-                    height: 400px; 
+                a {
+                    text-decoration:none;
+                    color: black;
                 }
 
-                .wallpaper {
-                    position: relative; 
-                    width: 100%; 
-                    height: 100%;
-                    background-image: url('https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/background_main.jpg');
-                    background-size: cover;
-                    background-repeat: no-repeat;   
-                }
-
-                .title {
-                    font-weight: bold; 
-                    color: white; 
-                    font-size: 35px; 
-                    padding-left: 5%; 
-                    padding-top: 5%; 
-                    margin: 0;
-                }
-
-                input[type="date"]
-                {
-                    padding: 10px;
-                    margin-bottom: 10px;
-                    border: 1px solid #ccc;
+                input[type="date"]{
+                    width: 40%;
                     border-radius: 5px;
-                    font-size: 15px;
-                    width: 150px;
+                    border: solid gainsboro 0.5px;
                 }
-                
+
+                .search-box {
+                    border-radius: 8px;
+                    background-color: #fff;
+                    padding: 5%;
+                    margin-left: 20%;
+                    margin-top: 5%;
+                    margin-bottom: 20%;
+                    width: 30%;
+                    box-shadow:  0px 0px 10px rgba(0, 0, 0, 0.2);
+                }
+
                 .from-to {
-                    padding: 10px;
+                    padding: 5px;
                     margin-bottom: 10px;
                     border: 1px solid #ccc;
                     border-radius: 5px;
@@ -83,164 +76,36 @@
                     width: 200px;
                 }
 
-                label {
-                    font-size: 20px;
+                button {
+                width: 80%;
+                background-color: #007bff;
+                color: #fff;
+                border: none;
+                padding: 10px;
+                cursor: pointer;
+                border-radius: 5px;
                 }
 
-                .search-box {
-                    height: 150px;
-                    width: 880px;
-                    margin-left: 5%;
-                    margin-top: 40px;
-                    margin-bottom: 40px;
-                    margin-right: 80px;
-                    border-radius: 5px;
-                    background-color: rgba(255, 255, 255, 0.9);
-                    
-                }
-
-                a {
-                    text-decoration:none;
-                    color: black;
-                }
-
-                #search {
-                    position: absolute; 
-                    top: 40%; 
-                    left: 50%;
-                    font-size: 18px;
-                    width: 56px;
-                    height: 36px; 
-                    background-color:aquamarine; 
-                    border: none; 
-                    border-radius: 5px;
-                }
-
-                .recommend-item-list{
-                    margin-left: 70px; 
-                    margin-right: 70px; 
-                    display: flex; 
-                    justify-content: space-around;
-                }
-
-                .recommend-item {
-                    width: 20%;
-                    border-radius:5px; 
-                    border-bottom:6px solid #007bff; 
-                    box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.2);
-                }
-
-                .recommend-item:hover {
-                    width: 20%;
-                    border-radius:5px; 
-                    border-bottom:6px solid #007bff; 
-                    box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.5);
-                }
-
-                .recommend-img > img {
-                  width: 100%; 
-                  height:100%;
-                  padding: 0;
-                  border-top-left-radius: 5px;
-                  border-top-right-radius: 5px;
-                }
-
-                .recommend-detail {
-                    padding-left: 20px;
-                }
-
-                .explore{
-                    margin-left: 70px; 
-                    margin-right: 70px; 
-                    display: flex; 
-                }
-
-                #map {
-                    width: 60%; 
-                    height: 400px;
-                }
-
-                #info {
-                    width: 40%; 
-                    margin-left: 10px;
-                }
-
-                #info-text{
-                    margin-left: 10px;
-                }
-
-                .map-item {
-                    margin: 10px; 
-                    display: flex; 
-                    justify-content:space-between; 
-                    border-radius: 5px;
-                    box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.2);
-                }
-                .map-item:hover {
-                    margin: 10px; 
-                    display: flex; 
-                    justify-content:space-between; 
-                    border-radius: 5px;
-                    box-shadow:0px 4px 15px 1.5px rgba(0,0,0,0.4);
-                }
-
-                .map-item-left{
-                    display: flex; 
-                }
-
-                .map-img{
-                    width:150px; 
-                    height: 106px; 
-                    padding: 0; 
-                    border-top-left-radius: 5px;
-                    border-bottom-left-radius: 5px;
-                }
-
-                .map-flight-detail{
-                    padding-left: 10px;
-                }
-
-                .map-item-right.map-flight-detail {
-                    padding-right: 10px;
-                }
-                
-                .map-item-right.map-flight-detail > p {
-                    margin-top: 23px;
-                }
-
-                .map-item-right.map-flight-detail > button {
-                    background-color: white;
-                    color: black;
-                    border: 1px solid dodgerblue; /* 外邊框 */
-                    border-radius: 10px; /* 圓角 */
-                    padding: 5px 15px;
-                    cursor: pointer;
-                    margin-top: 10px;
-                }
-
-                .function-list{
-                    display:flex;
-                    margin-left: 5%; 
-                }
-
-                .function-item{
-                    margin-right: 30px;
-                    border: solid 1px dodgerblue;
-                    border-radius: 5px;
-                    padding: 10px;
+                button:hover {
+                width: 80%;
+                background-color: #0056b3;
+                color: #fff;
+                border: none;
+                padding: 10px;
+                cursor: pointer;
+                border-radius: 5px;
                 }
 
                 #footer {
-                    position: relative; 
-                    bottom: 0; 
-                    left: 0; 
-                    background-color: #333;
+                position: relative;
+                bottom: 0;
+                width: 100%;
+                background-color: #333;
                 }
 
                 .copy-right > p {
                     margin-bottom: 0;
                 }
-
                 .web-info{
                     margin-left: 20px; 
                     padding: 20px; 
@@ -253,360 +118,178 @@
                     padding: 2px; 
                     border-radius: 5px;
                 }
-                
-        </style>
-    </head>
-    <body>
-        <div class="container">
-            <div class="navbar">
-                <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/flights.png">
-                <p>AirHunter</p>
-                <nav style="margin-left: 0">
-                    <ul>
-                        <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
-                        <li><a href="{{ url_for('price_graph') }}">看趨勢</a></li>
-                    </ul>
-                </nav>
-                <nav>
-                    <ul>
-                        {% if current_user.is_authenticated %}
-                        <li><a href="{{ url_for('member') }}">會員專區</a></li>
-                        <li><a href="{{ url_for('logout') }}">登出</a></li>
-                        {% else %}
-                        <li><a href="{{ url_for('login') }}">登入</a></li>
-                        <li><a href="{{ url_for('register') }}">註冊</a></li>
-                        {% endif %}
-                    </ul>
-                </nav>
-            </div> 
-        </div>
-        {% with messages = get_flashed_messages() %}
-        {% if messages %}
-        {% for message in messages %}
-                <p align="center" style="color:#007bff;">{{ message }}</p>
-        {% endfor %}
-        {% endif %}
-        {% endwith %} 
-        <div class="background-container">
-            <div class="wallpaper">
-                <p style="color: black;" class="title">出發！開始你的旅程</p>
-                <div class="search-box">
-                    <form action="{{ url_for('get_flight_lists') }}" method="GET">
-                        <div class="first-raw" id="scheduleSelect" style="display: flex; padding: 10px; justify-content: left;">
-                            <div>
-                                <label>國內</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="one-way-btn" name="schedule" value="oneWay" checked="true">
-                                <label for="one-way">單程</label>
-                            </div>
-                            <div>
-                                <input type="radio" id="return-btn" name="schedule" value="return">
-                                <label for="return">來回</label>
-                            </div>
-                            
-                        </div>
-                        <div class="second-raw" style="display: flex; padding: 10px; justify-content: left;">
-                            <div style="margin: 5px;">
-                                <label for="from">出發地</label></br>
-                                <select class="from-to" id="from-selector" name="departureAirports" required>
-                                    <option value="">請選擇</option>
-                                    <option value="TSA">台北松山機場 TSA</option>
-                                    <option value="KHH">高雄小港國際機場 KHH</option>
-                                    <option value="HUN">花蓮機場 HUN</option>
-                                    <option value="TTT">台東豐年機場 TTT</option>
-                                    <option value="TNN">台南機場 TNN</option>
-                                    <option value="RMQ">台中清泉崗機場 RMQ</option>
-                                    <option value="CYI">嘉義水上機場 CYI</option>
-                                    <option value="MZG">澎湖機場 MZG</option>
-                                    <option value="KNH">金門尚義機場 KNH</option>
-                                    <option value="MFK">馬祖(北竿)機場 MFK</option>
-                                    <option value="LZN">馬祖(南竿)機場 LZN</option>
-                                </select>
-                            </div>
-                            <div style="margin: 5px;">
-                                <label for="to">目的地</label></br>
-                                <select class="from-to" id="to-selector" name="arriveAirports" required>
-                                </select>
-                            </div>
-                            <div style="margin: 5px;">
-                                <label for="depart_date">去程</label></br>
-                                <input type="date" id="depart_date" name="departureDates" required>
-                            </div>
-                            <div style="margin: 5px;"> 
-                                <label for="return_date" id="returnDateLabel" style="display: none;">回程</label></br>
-                                <input type="date" id="return_date" name="returnDates" style="display: none;">
-                            </div>   
-                            <div style="position: relative;">
-                                <button type="submit" id="search">搜尋</button> 
-                            </div> 
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>  
-
-        <div class="title"><h3 class="function-list-title" style="color: black; font-size: 30px;">熱門功能</h3></div>
-        <div class="function-list">
-            <a href="{{ url_for('price_graph') }}">
-                <div class="function-item">
-                    <h4>趨勢圖表</h4>
-                    <p>提供視覺化圖表，快速查找最便宜的票價</p>
-                </div>
-            </a>
-            {% if current_user.is_authenticated %}
-            <a href="{{ url_for('favorites_list') }}">
-            {% else %}
-            <a href="{{ url_for('login') }}">
-            {% endif %}
-                <div class="function-item">
-                    <h4>航班追蹤</h4>
-                    <p>建立價格變動通知，即時掌握便宜票價</p>
-                </div>
-            </a>
-        </div>
-
-        <div class="title"><h3 class="recommend-item-list-title" style="color: black; font-size: 30px;"></h3></div>
-        <div class="recommend-item-list"></div>
-
-        <div class="title"><h3 style="color: black; font-size: 30px;">從台北出發，探索國內景點</h3></div>
-        <div class="explore">
-            <div id="map"></div>
-            <div id="info">
-                <p id="info-text"></p>
-            </div>
-        </div>
        
-
-        <footer id="footer" style="margin-top: 50px;">
-            <div class="web-info">
-                <p style="color: white;">Contact me</p>
-                <a href="https://github.com/TH-tinghsuan">Github</a>
-                <a href="">Linkedin</a>
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <a href="/"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/new_logo.png"></a>
+            <nav style="margin-left: 0">
+                <ul>
+                    <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
+                    <li><a href="/dashboard">看趨勢</a></li>
+                    <li><a href="/user/favorites">票價追蹤</a></li>
+                </ul>
+            </nav>
+            <nav>
+                <ul>
+                    {% if current_user.is_authenticated %}
+                    <li><a style="color: #333;">Hi, {{ current_user.username }}</a></li>
+                    <li><a href="{{ url_for('logout') }}">登出</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('login') }}">登入</a></li>
+                    <li><a href="{{ url_for('register') }}">註冊</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div> 
+    </div> 
+    <div class="search-box">
+        <div>
+            <h3>快速比價找出便宜機票！</h3>
+        </div>
+        <form action="{{ url_for('get_flight_lists') }}" method="GET">
+            <div class="first-raw" id="scheduleSelect" style="display: flex; margin: 5px;">
+                <div>
+                    <label>國內</label>
+                </div>
+                <div>
+                    <input type="radio" id="one-way-btn" name="schedule" value="oneWay" checked="true">
+                    <label for="one-way">單程</label>
+                </div>
+                <div>
+                    <input type="radio" id="return-btn" name="schedule" value="return">
+                    <label for="return">來回</label>
+                </div>  
             </div>
-            <div class="copy-right">
-                <p style="color: white;">© 2023 AirHunter All rights reserved.</p>
+            <div class="second-raw" style="margin: 5px;">
+                <div style="display: flex; margin-top: 5px; margin-bottom: 5px;">
+                    <label style="margin-right: 20px;" for="from">出發地</label></br>
+                    <select class="from-to" id="from-selector" name="departureAirports" required>
+                        <option value="">請選擇</option>
+                        <option value="TSA">台北松山機場 TSA</option>
+                        <option value="KHH">高雄小港國際機場 KHH</option>
+                        <option value="HUN">花蓮機場 HUN</option>
+                        <option value="TTT">台東豐年機場 TTT</option>
+                        <option value="TNN">台南機場 TNN</option>
+                        <option value="RMQ">台中清泉崗機場 RMQ</option>
+                        <option value="CYI">嘉義水上機場 CYI</option>
+                        <option value="MZG">澎湖機場 MZG</option>
+                        <option value="KNH">金門尚義機場 KNH</option>
+                        <option value="MFK">馬祖(北竿)機場 MFK</option>
+                        <option value="LZN">馬祖(南竿)機場 LZN</option>
+                    </select>
+                </div>
+                <div style="display: flex; margin-top: 5px; margin-bottom: 5px;">
+                    <label style="margin-right: 20px;" for="to">目的地</label></br>
+                    <select class="from-to" id="to-selector" name="arriveAirports" required>
+                    </select>
+                </div>
+                <div style="display: flex; margin-top: 5px; margin-bottom: 10px;">
+                    <label style="margin-right: 35px;" for="depart_date">去程</label></br>
+                    <input type="date" id="depart_date" name="departureDates" required>
+                </div>
+                <div style="display: flex; margin-top: 5px; margin-bottom: 10px;"> 
+                    <label for="return_date" id="returnDateLabel" style="display: none; margin-right: 35px;">回程</label></br>
+                    <input type="date" id="return_date" name="returnDates" style="display: none;">
+                </div>   
+                <div>
+                    <button type="submit" id="search">搜尋</button> 
+                </div> 
             </div>
-        </footer>
-
-        <script>
-            const oneWayBtn = document.getElementById('one-way-btn');
-            const returnBtn = document.getElementById('return-btn');
-            const returnDateLabel = document.getElementById('returnDateLabel');
-            const returnDateInput = document.getElementById('return_date');
-        
-            scheduleSelect.addEventListener('change', function () {
-                if (returnBtn.checked) {
-                    returnDateLabel.style.display = '';
-                    returnDateInput.style.display = '';
-                } else if (oneWayBtn.checked) {
-                    returnDateLabel.style.display = 'none';
-                    returnDateInput.style.display = 'none';
-                }
-                else {
-                    returnDateLabel.style.display = 'none';
-                    returnDateInput.style.display = 'none';
-                }
-            });
-
-            const fromSelect = document.getElementById('from-selector');
-            const toSelect = document.getElementById('to-selector');
-
-            // 定義不同類別對應的子類別選項
-            const fromOptions = {
-                'TSA': ['台東豐年機場 TTT', '澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH', '馬祖(北竿)機場 MFK', '馬祖(南竿)機場 LZN'],
-                'KHH': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
-                'HUN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '高雄小港國際機場 KHH'],
-                'TTT': ['台北松山機場 TSA'],
-                'TNN': ['澎湖機場 MZG', '金門尚義機場 KNH'],
-                'RMQ': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
-                'CYI': ['澎湖機場 MZG', '金門尚義機場 KNH'],
-                'MZG': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '金門尚義機場 KNH', '高雄小港國際機場 KHH'],
-                'KNH': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '澎湖機場 MZG', '高雄小港國際機場 KHH'],
-                'MFK': ['台北松山機場 TSA'],
-                'LZN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA']
-            };
-
-            // 當選擇框中的選擇改變時，更新第二個選擇框的選項
-            fromSelect.addEventListener('change', () => {
-                console.log("change")
-                const fromSelectCategory = fromSelect.value;
-                const toSelectOptions = fromOptions[fromSelectCategory] || [];
-
-                // 清空第二個選擇框的內容
-                toSelect.innerHTML = '';
-                const defaultOption = document.createElement('option');
-                defaultOption.textContent = "請選擇";
-                toSelect.appendChild(defaultOption);
-                // 將新的選項填充到第二個選擇框中
-                toSelectOptions.forEach((option) => {
-                    const newOption = document.createElement('option');
-                    newOption.textContent = option;
-                    newOption.value = option.slice(-3);
-                    toSelect.appendChild(newOption);
-                });
-            });
-
-            fetch('/price/change/get')
-            .then(response => response.json())
-            .then(data => {
-                data.forEach(item => {
-                    const recommend_item = document.createElement("div")
-                    recommend_item.className = "recommend-item"
-                    const link = document.createElement("a")
-                    link.href = `/flight/lists?schedule=oneWay&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_date}&returnDates=`
-
-                    const img_div = document.createElement("div")
-                    img_div.className = "recommend-img"
-                    const img = document.createElement("img")
-                    img.src = item.image
-                    img_div.appendChild(img)
-
-                    const detail = document.createElement("div")
-                    detail.className = "recommend-detail"
-                    const h3 = document.createElement('h3');
-                    h3.textContent = item.depart_airport + "-" + item.arrive_airport;
-
-                    const departDate = document.createElement('p');
-                    departDate.classList.add('depart-date');
-
-                    const dateSpan = document.createElement('span');
-                    dateSpan.textContent = item.depart_date;
-                    const departSpan = document.createElement('span');
-                    departSpan.textContent = '出發';
-                    departDate.appendChild(dateSpan);
-                    departDate.appendChild(departSpan);
-
-                    const todayPrice = document.createElement('p');
-                    todayPrice.classList.add('today-price');
-
-                    const todayPriceSpan = document.createElement('span');
-                    todayPriceSpan.textContent = '今日價格';
-                    const priceSpan = document.createElement('span');
-                    priceSpan.textContent = ' $ ' + item.today_price + " 起";
-                    todayPrice.appendChild(todayPriceSpan);
-                    todayPrice.appendChild(priceSpan);
-
-                    const describeText = document.createElement('p');
-                    describeText.classList.add('describe-text');
-                    const cheaperSpan = document.createElement('span');
-                    cheaperSpan.textContent = '比昨天便宜';
-                    const discountSpan = document.createElement('span');
-                    discountSpan.textContent = item.change_rate + "%";
-                    describeText.appendChild(cheaperSpan);
-                    describeText.appendChild(discountSpan);
-
-                    const recommend_list = document.querySelector(".recommend-item-list")
-                    const title = document.querySelector(".recommend-item-list-title")
-                    title.textContent = "最新國内機票優惠"
-                    detail.appendChild(h3);
-                    detail.appendChild(departDate);
-                    detail.appendChild(todayPrice);
-                    detail.appendChild(describeText);
-                    link.appendChild(img_div)
-                    link.appendChild(detail)
-                    recommend_item.appendChild(link)
-                    recommend_list.appendChild(recommend_item)
-                    })
-                })
-        </script>
-       <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyC9f8xvUYvpcttU6A5vw_S9TcS02sFeVfE&callback=initMap" async defer></script>
-       <script>
-       
-       function initMap(data) {
-            const map = new google.maps.Map(document.getElementById("map"), {
-                center: { lat: 25.0699, lng: 121.5525 }, // 台北松山機場的經緯度
-                zoom: 7, // 設定初始縮放級別
-            });
-            data.forEach(item => {
-                    const airport_info = airports.find(airport => airport.name === item.arrive_airport);
-                    const marker = new google.maps.Marker({
-                        position: { lat: airport_info.lat, lng: airport_info.lng },
-                        map: map,
-                        title: airport_info.name
-                    });
-                    const link_href = `/flight/lists?schedule=oneWay&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_date}&returnDates=`
-                    const infoWindow = new google.maps.InfoWindow({
-                        content: `<a href=${link_href}><p>${airport_info.name}</p><p>$ ${item.price}起</p></a>`
-                    });
-
-                    marker.addListener("click", () => {
-                        infoWindow.open(map, marker);
-                    });
-                });
+        </form>
+    </div>   
+    <footer id="footer" style="margin-top: 50px;">
+        <div class="web-info">
+            <p style="color: white;">Contact me</p>
+            <a href="https://github.com/TH-tinghsuan">Github</a>
+            <a href="">Linkedin</a>
+        </div>
+        <div class="copy-right">
+            <p style="color: white;">© 2023 AirHunter All rights reserved.</p>
+        </div>
+    </footer>
+    <script>
+        const oneWayBtn = document.getElementById('one-way-btn');
+        const returnBtn = document.getElementById('return-btn');
+        const returnDateLabel = document.getElementById('returnDateLabel');
+        const returnDateInput = document.getElementById('return_date');
+    
+        scheduleSelect.addEventListener('change', function () {
+            if (returnBtn.checked) {
+                returnDateLabel.style.display = '';
+                returnDateInput.style.display = '';
+                returnDateInput.setAttribute("required", "true");
+            } else if (oneWayBtn.checked) {
+                returnDateLabel.style.display = 'none';
+                returnDateInput.style.display = 'none';
+                returnDateInput.removeAttribute("required");
             }
-   
-       // 建立機場資訊的陣列
-       const airports = [
-           { name: "台北", lat: 25.0699, lng: 121.5525 },
-           { name: "澎湖", lat: 23.4667, lng: 119.6194 },
-           { name: "台中", lat: 24.2647, lng: 120.6200 },
-           { name: "台東", lat: 22.7933, lng: 121.1817 },
-           { name: "花蓮", lat: 24.0238, lng: 121.6179 },
-           { name: "高雄", lat: 22.57182, lng: 120.34056 },
-           { name: "金門", lat: 24.43615, lng: 118.368 },
-           { name: "台南", lat: 22.94834, lng: 120.2162 },
-           { name: "馬祖", lat: 26.2239, lng: 119.99931},
-           { name: "馬祖(南竿)", lat: 26.158304, lng: 119.9562},
-           { name: "嘉義", lat: 23.45477, lng: 120.403898},
-           
-       ];
+            else {
+                returnDateLabel.style.display = 'none';
+                returnDateInput.style.display = 'none';
+                returnDateInput.removeAttribute("required");
+            }
+        });
 
-        fetch('/map/get')
-            .then(response => response.json())
-            .then(data => {
-                initMap(data);
-                const infoP = document.querySelector("#info-text")
-                var dateSpan = document.createElement('span');
-                dateSpan.textContent = data[0].depart_date;
-                var searchSpan = document.createElement('span');
-                searchSpan.textContent = '從台北出發的價格搜尋';
-                infoP.appendChild(dateSpan);
-                infoP.appendChild(searchSpan);
-                data.forEach(item => { 
-                    const link_href = `/flight/lists?schedule=oneWay&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_date}&returnDates=`
-                    const a_link = document.createElement("a")
-                    a_link.href = link_href
+        const fromSelect = document.getElementById('from-selector');
+        const toSelect = document.getElementById('to-selector');
 
-                    var mapItemDiv = document.createElement('div');
-                    mapItemDiv.classList.add('map-item');
-                    var mapItemLeftDiv = document.createElement('div');
-                    mapItemLeftDiv.classList.add('map-item-left');
-                    var mapImg = document.createElement('img');
-                    mapImg.classList.add('map-img');
-                    mapImg.src = item.image;
-                    var mapFlightDetailDiv = document.createElement('div');
-                    mapFlightDetailDiv.classList.add('map-flight-detail');
-                    var cityH3 = document.createElement('h3');
-                    cityH3.textContent = item.arrive_airport;
-                    var flightInfoP = document.createElement('p');
-                    flightInfoP.textContent = item.depart_airport_code +" - "+ item.arrive_airport_code;
+        const fromOptions = {
+            'TSA': ['台東豐年機場 TTT', '澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH', '馬祖(北竿)機場 MFK', '馬祖(南竿)機場 LZN'],
+            'KHH': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+            'HUN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '高雄小港國際機場 KHH'],
+            'TTT': ['台北松山機場 TSA'],
+            'TNN': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+            'RMQ': ['澎湖機場 MZG', '花蓮機場 HUN', '金門尚義機場 KNH'],
+            'CYI': ['澎湖機場 MZG', '金門尚義機場 KNH'],
+            'MZG': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '金門尚義機場 KNH', '高雄小港國際機場 KHH'],
+            'KNH': ['台中清泉崗機場 RMQ', '台北松山機場 TSA', '台南機場 TNN', '嘉義水上機場 CYI', '澎湖機場 MZG', '高雄小港國際機場 KHH'],
+            'MFK': ['台北松山機場 TSA'],
+            'LZN': ['台中清泉崗機場 RMQ', '台北松山機場 TSA']
+        };
 
-                    mapItemLeftDiv.appendChild(mapImg);
-                    mapItemLeftDiv.appendChild(mapFlightDetailDiv);
-                    mapFlightDetailDiv.appendChild(cityH3);
-                    mapFlightDetailDiv.appendChild(flightInfoP);
-
-
-                    var mapItemRightDiv = document.createElement('div');
-                    mapItemRightDiv.classList.add('map-item-right', 'map-flight-detail');
-                    var trackButton = document.createElement('button');
-                    trackButton.textContent = '搜尋航班';
-                    var priceP = document.createElement('p');
-                    priceP.textContent = "$ " + item.price + " 起";
-
-                    mapItemRightDiv.appendChild(trackButton);
-                    mapItemRightDiv.appendChild(priceP);
-
-                    mapItemDiv.appendChild(mapItemLeftDiv);
-                    mapItemDiv.appendChild(mapItemRightDiv);
-
-                    a_link.appendChild(mapItemDiv)
-                    const infoDiv = document.querySelector("#info")
-                    infoDiv.appendChild(a_link);
-                });
+        fromSelect.addEventListener('change', () => {
+            const fromSelectCategory = fromSelect.value;
+            const toSelectOptions = fromOptions[fromSelectCategory] || [];
+            toSelect.innerHTML = '';
+            const defaultOption = document.createElement('option');
+            defaultOption.textContent = "請選擇";
+            toSelect.appendChild(defaultOption);
+            toSelectOptions.forEach((option) => {
+                const newOption = document.createElement('option');
+                newOption.textContent = option;
+                newOption.value = option.slice(-3);
+                toSelect.appendChild(newOption);
             });
-       </script>
-    </body>
+        });
 
+        const departDateInput = document.getElementById("depart_date")
+        var minDate = new Date();
+        var minDate_ts = minDate.getTime();
+        minDate.setTime(minDate_ts + 1 * 1000 * 60 * 60 *24);
+        var maxDate = new Date();
+        var maxDate_ts = maxDate.getTime();
+        maxDate.setTime(maxDate_ts + 60 * 1000 * 60 * 60 *24);
+        departDateInput.min = minDate.toISOString().split('T')[0];
+        departDateInput.max = maxDate.toISOString().split('T')[0];
+        returnDateInput.min = minDate.toISOString().split('T')[0];
+        returnDateInput.max = maxDate.toISOString().split('T')[0];
+        departDateInput.addEventListener("input", function() {
+            if (departDateInput.value === ''){
+                returnDateInput.min = minDate.toISOString().split('T')[0];
+                returnDateInput.max = maxDate.toISOString().split('T')[0];
+                returnDateInput.value = '';
+            }
+            else if(departDateInput.value > returnDateInput.value){
+                returnDateInput.value = '';
+                returnDateInput.min = departDateInput.value;
+            }
+            else{
+                returnDateInput.min = departDateInput.value;
+            }
+        });
+    </script>
+</body>
 </html>

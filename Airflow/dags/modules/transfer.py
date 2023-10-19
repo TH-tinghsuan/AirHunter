@@ -346,6 +346,9 @@ def compare_price_difference(**kwargs):
     new_df = pd.DataFrame.from_dict(new_data)
     ti = kwargs['ti']
     old_df = ti.xcom_pull(key='old_dataframe')
+    # test
+    print(f"old_df {old_df.columns}")
+    print(f"new_df {new_df.columns}")
     compare_df = pd.merge(old_df, new_df, on=['depart_airport_code', 'arrive_airport_code', 'depart_date'], how='inner')
     compare_df["price_diff"] = compare_df['min_price_x'] - compare_df['min_price_y']
     filtered_data = compare_df.query('price_diff > 0')
@@ -357,7 +360,7 @@ def compare_price_difference(**kwargs):
             log = (i['depart_airport_code'], i['arrive_airport_code'], i['depart_date'], i['min_price_x'], i['min_price_y'], i['search_date_x'], True)
             log_list.append(log)
         sql_log = """INSERT INTO price_history_logs(depart_airport_code, arrive_airport_code, depart_date, old_min_price, new_min_price, search_date, active) VALUES(%s, %s, %s, %s, %s, %s, %s)"""
-        #cursor.executemany(sql_log, log_list)
+        cursor.executemany(sql_log, log_list)
     kwargs['ti'].xcom_push(key='noti_list', value=filtered_data)
     compare_price_by_date()
 

@@ -28,6 +28,11 @@
                     color: dimgrey;
                 }
 
+                ul > li > a:hover {
+                    font-size: 18px;
+                    color: grey;
+                }
+
                 nav {
                     margin-left: auto; 
                 }
@@ -37,8 +42,8 @@
                     list-style: none;   
                 }
                 img {
-                    height: 30px;
-                    width: 30px;
+                    height: 33px;
+                    width: 158px;
                     padding: 5px;
                 }
                 a {
@@ -95,18 +100,18 @@
 <body>
     <div class="container">
         <div class="navbar">
-            <img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/flights.png">
-            <p>AirHunter</p>
+            <a href="/"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/new_logo.png"></a>
             <nav style="margin-left: 0">
                 <ul>
                     <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
-                    <li><a href="{{ url_for('price_graph') }}">看趨勢</a></li>
+                    <li><a href="/dashboard">看趨勢</a></li>
+                    <li><a href="/user/favorites">票價追蹤</a></li>
                 </ul>
             </nav>
             <nav>
                 <ul>
                     {% if current_user.is_authenticated %}
-                    <li><a href="{{ url_for('member') }}">會員專區</a></li>
+                    <li><a style="color: #333;">Hi, {{ current_user.username }}</a></li>
                     <li><a href="{{ url_for('logout') }}">登出</a></li>
                     {% else %}
                     <li><a href="{{ url_for('login') }}">登入</a></li>
@@ -130,7 +135,7 @@
 
         <label for="password_confirm">確認密碼</label>
         <input type="password" id="ConfirmPassword" name="password_confirm" required oninput="setCustomValidity('')" onchange="if(document.getElementById('inputPassword').value != document.getElementById('ConfirmPassword').value){setCustomValidity('前/後密碼不一致');}"><br>
-
+        <p>已經有帳號了嗎？點此<a href="/user/login" style="color: #007bff;">登入</a></p>
         <button type="submit">註冊</button>
     </form>
 </body>
