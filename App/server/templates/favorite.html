@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirHunter | 票價追蹤</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f2f2f2;
+            margin: 0;
+            padding: 0;
+        }
+
+        .container {
+                    box-sizing: border-box;
+                    padding-left: 2%;
+                    padding-right: 2%;
+                    background-color:white;
+                }
+                .navbar {
+                    display: flex;
+                    align-items: center;
+                }
+
+                ul > li > a {
+                    font-size: 18px;
+                    color: dimgrey;
+                }
+
+                ul > li > a:hover {
+                    font-size: 18px;
+                    color: grey;
+                }
+
+                nav {
+                    margin-left: auto; 
+                }
+                nav ul li {
+                    display: inline;
+                    margin-left: 15px;
+                    list-style: none;   
+                }
+                #logo-img {
+                    height: 33px;
+                    width: 158px;
+                    padding: 5px;
+                }
+                a {
+                    text-decoration:none;
+                    color: black;
+                }
+
+        h1 {
+            text-align: center;
+            color: #333;
+        }
+
+        h2 {
+
+            text-align: center;
+            color:#007bff;    
+        }
+
+        #fav-item {
+            position: relative;
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+            align-items: center;
+        }
+
+        #fav-item:hover {
+            position: relative;
+            max-width: 400px;
+            margin: 20px auto;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4); 
+            align-items: center;
+        }
+
+        span {
+            padding: 5px;
+        }
+
+        #remove-fav-img {
+            height: 20px;
+            width: 20px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #remove-fav-img:hover {
+            height: 22px;
+            width: 22px;
+            position: absolute;
+            top: 10px;
+            right: 10px;
+        }
+
+        #link-detail {
+            font-size: 15px;
+            color: white;
+            border-radius: 5px;
+            background-color: #769FCD;
+            padding: 5px;
+            position: absolute;
+            bottom: 10px;
+            right: 10px;
+            text-decoration:none;
+        }
+
+        .text {
+            padding: 5px 10px;
+        }
+        .schedule {
+            background-color: lightgrey; 
+            padding: 5px 8px; 
+            font-size: 12px; 
+            border-radius: 5px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="navbar">
+            <a href="/"><img id="logo-img" src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/new_logo.png"></a>
+            <nav style="margin-left: 0">
+                <ul>
+                    <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
+                    <li><a href="/dashboard">看趨勢</a></li>
+                    <li><a href="/user/favorites">票價追蹤</a></li>
+                </ul>
+            </nav>
+            <nav>
+                <ul>
+                    {% if current_user.is_authenticated %}
+                    <li><a style="color: #333;">Hi, {{ current_user.username }}</a></li>
+                    <li><a href="{{ url_for('logout') }}">登出</a></li>
+                    {% else %}
+                    <li><a href="{{ url_for('login') }}">登入</a></li>
+                    <li><a href="{{ url_for('register') }}">註冊</a></li>
+                    {% endif %}
+                </ul>
+            </nav>
+        </div> 
+    </div> 
+    <h1>票價追蹤</h1>
+    <div id="fav-list">
+    </div>
+    <script>
+        const favList = document.getElementById("fav-list")
+        fetch('/user/favorites/get')
+            .then(response => response.json())
+            .then(data => {
+                if (data.length === 0){
+                    wording = document.createElement("h2");
+                    wording.textContent = "收藏清單裡目前沒有東西～～";
+                    document.body.appendChild(wording);
+                }
+                else{
+                    data.forEach(item => {
+                        console.log(item)
+                        const container = document.createElement("div");
+                        container.id = "fav-item";
+                        const text_container = document.createElement("div");
+                        text_container.id = "fav-item-text";
+                        
+                        const info_container = document.createElement("div");
+                        info_container.className = "text"
+                        const depart_text = document.createElement("span");
+                        const arrive_text = document.createElement("span");
+                        const arrow = document.createElement("span");
+                        depart_text.textContent = item.depart_city;
+                        arrive_text.textContent = item.arrive_city;
+                        if (item.schedule === "return"){arrow.textContent = "↔"}
+                        else if (item.schedule === "oneWay"){arrow.textContent = "→"};
+                        info_container.appendChild(depart_text)
+                        info_container.appendChild(arrow)   
+                        info_container.appendChild(arrive_text)
+                        info_container.style.fontSize = "20px";
+                        info_container.style.fontWeight = "bold";
+
+                        const date_container = document.createElement("div");
+                        date_container.className = "text"
+                        const depart_date = document.createElement("span");
+                        const return_date = document.createElement("span");
+                        const dash_sign = document.createElement("span");
+                        const schedule = document.createElement("span");
+                        schedule.className = "schedule"
+                        depart_date.textContent = item.depart_date_formatted;
+                        date_container.appendChild(depart_date)
+                        if (item.schedule === "return")
+                            {
+                                return_date.textContent = item.return_date_formatted;
+                                dash_sign.textContent = "-"
+                                schedule.textContent = "往返";
+                                date_container.appendChild(dash_sign);
+                                date_container.appendChild(return_date);
+                                date_container.appendChild(schedule);
+                            }
+                        else if(item.schedule === "oneWay"){
+                            schedule.textContent = "單程";
+                            date_container.appendChild(schedule);
+                        }
+                        date_container.style.fontSize = "16px";
+                        
+                        const price_container = document.createElement("div");
+                        price_container.className = "text";
+                        const min_price = document.createElement("span");
+                        min_price.textContent = `NTD$ ${item.min_price}`;
+                        price_container.appendChild(min_price)
+                        price_container.style.fontSize = "18px";
+
+                        const link_container = document.createElement("div");
+                        link_container.id = "fav-item-link"
+                        
+                        remove_fav_link = document.createElement("a")
+                        remove_fav_link.href = '#'
+                        remove_fav_link.id = "remove-fav"
+                        remove_fav_img = document.createElement("img")
+                        remove_fav_img.id = "remove-fav-img"
+                        remove_fav_img.src = "https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/x-mark.png"
+                        remove_fav_link.appendChild(remove_fav_img)
+                        link_container.appendChild(remove_fav_link)
+                        
+                        detail_pg_link = document.createElement("a")
+                        detail_pg_link.id = "link-detail"
+                        if (item.schedule == "oneWay"){
+                            detail_pg_link.href = `/flight/lists?schedule=${item.schedule}&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_date}`
+                        }
+                        else if (item.schedule == "return"){
+                            detail_pg_link.href = `/flight/lists?schedule=${item.schedule}&departureAirports=${item.depart_airport_code}&arriveAirports=${item.arrive_airport_code}&departureDates=${item.depart_date}&returnDates=${item.return_date}`
+                        }
+                        detail_pg_link.textContent = "檢視航班 →"
+                        link_container.appendChild(detail_pg_link)
+                
+                        text_container.appendChild(info_container)
+                        text_container.appendChild(date_container)
+                        text_container.appendChild(price_container)
+                        container.appendChild(text_container)
+                        container.appendChild(link_container)
+                        favList.appendChild(container)
+
+                        remove_fav_img.addEventListener('click', function (event){
+                            let data = {
+                                schedule: item.schedule,
+                                depart_date: item.depart_date,
+                                return_date: item.return_date,
+                                depart_airport_code: item.depart_airport_code,
+                                arrive_airport_code: item.arrive_airport_code
+                            }
+                            console.log(data)
+                            fetch('/user/favorites/remove', {
+                                    method: 'POST',
+                                    headers: {
+                                        'Content-Type': 'application/json'
+                                    },
+                                    body: JSON.stringify(data)
+                                });  
+                            container.style.display = 'none';
+                        })
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('error occur:', error);
+            });
+    </script>      
+</body>
+</html>

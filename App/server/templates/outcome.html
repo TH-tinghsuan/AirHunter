@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>AirHunter | 機票比價結果</title>
+        <style>
+            body {
+                background-color: #f2f2f2;
+                margin: 0;
+                padding: 0;
+            }
+
+            .container {
+                    box-sizing: border-box;
+                    padding-left: 2%;
+                    padding-right: 2%;
+                    background-color:white;
+                }
+                .navbar {
+                    display: flex;
+                    align-items: center;
+                }
+
+                ul > li > a {
+                    font-size: 18px;
+                    color: dimgrey;
+                }
+
+                ul > li > a:hover {
+                    font-size: 18px;
+                    color: grey;
+                }
+
+                nav {
+                    margin-left: auto; 
+                }
+                nav ul li {
+                    display: inline;
+                    margin-left: 15px;
+                    list-style: none;   
+                }
+                #logo-img {
+                    height: 33px;
+                    width: 158px;
+                    padding: 5px;
+                }
+                a {
+                    text-decoration:none;
+                    color: black;
+                }
+
+            #direct-img {
+                height: 30px;
+                width: 30px;
+                padding: 5px;
+            }
+
+
+            h1 {
+                text-align: center;
+            }
+
+            div[id="item"] {
+                max-width: 900px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
+            }
+
+            div[id="item"]:hover {
+                max-width: 900px;
+                margin: 20px auto;
+                background-color: #fff;
+                padding: 20px;
+                border-radius: 5px;
+                box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4);
+            }
+
+            div[id="go"], [id="back"]
+             {
+                display: flex;
+                justify-content: space-between;
+                align-items: center;
+                margin: 0;
+                padding: 0 20px;
+            }
+
+            .direct-btn {
+                margin: 5px; 
+                background-color:white; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            .direct-btn:hover {
+                margin: 5px; 
+                background-color: rgb(190, 236, 251); 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            .direct-btn:active {
+                margin: 5px; 
+                background-color: lightblue; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 12px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            #airline-img {
+                height: 50px;
+                width: 60px;
+            }
+            #airline-img img {
+            height: 100%;
+            width: 100%;
+            }
+
+            #favoriteBtn {
+                background-color:whitesmoke; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                color: black; 
+                padding: 5px;
+            }
+
+            #favoriteBtn:hover {
+                background-color:whitesmoke;
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                border: solid 1.5px blue;
+                color: blue; 
+                padding: 5px;
+            }
+            #favoriteBtn:active {
+                background-color:whitesmoke; 
+                border-radius: 5px; 
+                text-align: center; 
+                font-size: 16px; 
+                color: blue; 
+                border: solid 2px blue;
+                padding: 5px;
+            }
+
+            #footer {
+                position: relative;
+                bottom: 0;
+                width: 100%;
+                background-color: #333;
+                }
+
+                .copy-right > p {
+                    margin-bottom: 0;
+                }
+                .web-info{
+                    margin-left: 20px; 
+                    padding: 20px; 
+                    display: in-line;
+                }
+
+                .web-info > a{
+                    color: white; 
+                    border: solid white 0.5px; 
+                    padding: 2px; 
+                    border-radius: 5px;
+                }
+
+                #not-found-img {
+                    margin-left:30%; 
+                    margin-top:5%; 
+                    width:40%; 
+                    height:80%;
+                }
+
+                #not-found-img > img{
+                    width:100%; 
+                    height:100%;
+                }
+
+                #page-link{
+                   display: flex;
+                   justify-content: space-between;
+                }
+
+                #page-link > a > img{
+                   height: 20px;
+                   width: 20px;
+                }
+
+        </style>
+    </head>
+    <body>
+        <div class="container">
+            <div class="navbar">
+                <a href="/"><img id="logo-img" src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/new_logo.png"></a>
+                <nav style="margin-left: 0">
+                    <ul>
+                        <li><a href="{{ url_for('search_price') }}">搜機票</a></li>
+                        <li><a href="/dashboard">看趨勢</a></li>
+                        <li><a href="/user/favorites">票價追蹤</a></li>
+                    </ul>
+                </nav>
+                <nav>
+                    <ul>
+                        {% if current_user.is_authenticated %}
+                        <li><a style="color: #333;">Hi, {{ current_user.username }}</a></li>
+                        <li><a href="{{ url_for('logout') }}">登出</a></li>
+                        {% else %}
+                        <li><a href="{{ url_for('login') }}">登入</a></li>
+                        <li><a href="{{ url_for('register') }}">註冊</a></li>
+                        {% endif %}
+                    </ul>
+                </nav>
+            </div> 
+        </div> 
+        <!-- 單程 -->
+        {% if flight_info %}
+            {% if schedule == "oneWay" %}
+            <div id="title" style="background-color: lightblue; max-width: 900px; margin: 20px auto; padding: 20px; border-radius: 5px; box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);">
+                <div id="page-link">
+                    <a href="/search"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/undo.png"></a>
+                    <a href="/home"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/home.png"></a>
+                </div>
+                <div id="city_name">
+                    <span style="font-size: 35px; font-weight:bold;">{{ depart["city_name"] }} - {{ arrive["city_name"] }}</span>
+                    <span style="font-size: 20px; font-weight:bold;">單程</span>    
+                </div>
+                <div id="date">
+                    <span style="font-size: 15px;"">{{date}}</p>
+                </div>
+                {% if current_user.is_authenticated %}
+                    <div style="text-align: right;">
+                        <button id="favoriteBtn">
+                            追蹤票價
+                        </button>
+                    </div>
+                {% endif %}
+            </div>   
+                {% for item in flight_info %}
+                    <div id="item">
+                        <div id="go">
+                            <div id="airline-img">
+                                <img src="{{ item['airline_img'] }}">
+                            </div>
+                            <div>
+                                <div id="time-info" style="font-weight:bold; font-size: 18px;">
+                                    <span>{{ item["depart_time"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["arrive_time"] }}</span>
+                                </div>
+                                <div id="airport-info" style="color: gray; font-size: 16px;">
+                                    <span>{{ item["depart_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["depart_airport"]["airport_name"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["arrive_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["arrive_airport"]["airport_name"] }}</span>
+                                </div>
+                            </div>
+                            <div id="type">
+                                <p>{{item["type"]}}</p>
+                            </div>
+                            <div id="duration">
+                                <p>{{item["duration"]}}</p>
+                            </div>    
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; padding: 0 20px;">
+                            <div id="airline" style="margin-right: auto;">
+                                <p style="color: grey; margin: 0; padding-top: 15px; font-size: 15px;">{{ item["airline"]}}</p>
+                            </div>
+                            <div id="min-price">
+                                <p style="font-weight:bold; margin: 0; padding-top: 15px;">
+                                    <a>NTD$ {{ item["minPrice"]}} 起 ⌵</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="price-info" style="padding: 0 20px; display: none;">
+                            {% for i in item["items"]%}
+                            <hr size=1 style="color:lightgrey; border-style:dashed; width:490">
+                            <div id="agent" style="display: flex; justify-content: flex-end; padding: 5px;">
+                                <span style="margin-right: auto;">{{ i["agentName"]}}</span>
+                                <div>
+                                    <span>NTD$ {{ i["price"] }} </span>
+                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["flight_code"] }}">前往</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            <!-- 單程 -->
+            <!-- 來回 -->
+            {% elif schedule == "return" %}
+                <div id="title" style="background-color: lightblue; max-width: 900px; margin: 20px auto; padding: 20px; border-radius: 5px;">
+                    <div id="page-link">
+                        <a href="/search"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/undo.png"></a>
+                        <a href="/home"><img src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/home.png"></a>
+                    </div>
+                    <div id="city_name">
+                        <span style="font-size: 35px; font-weight:bold;">{{ depart["city_name"] }} - {{ arrive["city_name"] }}</span>
+                        <span style="font-size: 20px; font-weight:bold;">來回</span>    
+                    </div>
+                    <div id="date">
+                        <span style="font-size: 15px;""> {{ dp_date }} - {{ rt_date }}</p>
+                    </div>
+                    {% if current_user.is_authenticated %}
+                    <div style="text-align: right;">
+                        <button id="favoriteBtn">
+                            追蹤票價
+                        </button>
+                    </div>
+                    {% endif %}
+                </div>   
+                {% for item in flight_info %}
+                    <div id="item">
+                        <div id="go">
+                            <div id="airline-img">
+                                <img src="{{ item['go_airline_img'] }}">
+                            </div>
+                            <div>
+                                <div id="time-info" style="font-weight:bold; font-size: 18px;">
+                                    <span>{{ item["go_depart_time"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["go_arrive_time"] }}</span>
+                                </div>
+                                <div id="airport-info" style="color: gray; font-size: 16px;">
+                                    <span>{{ item["go_depart_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["go_depart_airport"]["airport_name"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["go_arrive_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["go_arrive_airport"]["airport_name"] }}</span>
+                                </div>
+                                <div id="flight_code" style="display: none;">
+                                    <span>item['go_flight_info']</span>
+                                </div>
+                            </div>
+                            <div id="type">
+                                <p>{{item["go_type"]}}</p>
+                            </div>
+                            <div id="duration">
+                                <p>{{item["go_duration"]}}</p>
+                            </div>    
+                        </div>
+                        <div id="back">
+                            <div id="airline-img">
+                                <img src="{{ item['back_airline_img'] }}">
+                            </div>
+                            <div>
+                                <div id="time-info" style="font-weight:bold; font-size: 18px;">
+                                    <span>{{ item["back_depart_time"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["back_arrive_time"] }}</span>
+                                </div>
+                                <div id="airport-info" style="color: gray; font-size: 16px;">
+                                    <span>{{ item["back_depart_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["back_depart_airport"]["airport_name"] }}</span>
+                                    <span> - </span>
+                                    <span>{{ item["back_arrive_airport"]["IATA_code"] }}</span>
+                                    <span>{{ item["back_arrive_airport"]["airport_name"] }}</span>
+                                </div>
+                                <div id="flight_code" style="display: none;">
+                                    <span>item['back_flight_info]</span>
+                                </div>
+                            </div>
+                            <div id="type">
+                                <p>{{item["back_type"]}}</p>
+                            </div>
+                            <div id="duration">
+                                <p>{{item["back_duration"]}}</p>
+                            </div>    
+                        </div>
+                        <div style="display: flex; justify-content: flex-end; padding: 0 20px;">
+                            <div id="airline" style="margin-right: auto;">
+                                <p style="color: grey; margin: 0; padding-top: 15px; font-size: 15px;">{{ item["back_airline"]}}</p>
+                            </div>
+                            <div id="min-price">
+                                <p style="font-weight:bold; margin: 0; padding-top: 15px;">
+                                    <a>NTD$ {{ item["minPrice"]}} 起 ⌵</a>
+                                </p>
+                            </div>
+                        </div>
+                        <div id="price-info" style="padding: 0 20px; display: none;">
+                            {% for i in item["items"]%}
+                            <hr size=1 style="color:lightgrey; border-style:dashed; width:490">
+                            <div id="agent" style="display: flex; justify-content: flex-end; padding: 5px;">
+                                <span style="margin-right: auto;">{{ i["agentName"]}}</span>
+                                <div>
+                                    <span>NTD$ {{ i["price"] }} </span>
+                                    <button class="direct-btn" id="{{i["agentName"] +"-"+item["go_flight_info"]+"-"+item["back_flight_info"] }}">前往</button>
+                                </div>
+                            </div>
+                            {% endfor %}
+                        </div>
+                    </div>
+                {% endfor %}
+            {% endif %}
+        {% else %}
+            {% if response_text %}
+                <div id="not-found-img">
+                    <img src="../static/not_found.png" alt="Bad request">
+                </div>
+            {% else %}
+                <div id="item">
+                    <p style="text-align: center">沒有符合的結果</p>
+                </div>
+            {% endif %}
+        {% endif %}
+        <footer id="footer" style="margin-top: 50px;">
+            <div class="web-info">
+                <p style="color: white;">Contact me</p>
+                <a href="https://github.com/TH-tinghsuan">Github</a>
+                <a href="">Linkedin</a>
+            </div>
+            <div class="copy-right">
+                <p style="color: white;">© 2023 AirHunter All rights reserved.</p>
+            </div>
+        </footer>
+
+    <!--引用jQuery-->
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+    <!--引用jQuery BlockUI-->
+    <script type="text/javascript" src="https://malsup.github.io/jquery.blockUI.js"></script>
+    <script src="https://unpkg.com/sweetalert/dist/sweetalert.min.js"></script>
+    <script>
+        var items = document.querySelectorAll('#item');
+        items.forEach(function(item) {
+            item.addEventListener('click', function() {
+                var agentInfo = item.querySelector('#price-info'); 
+                if (agentInfo.style.display === 'block') {
+                    agentInfo.style.display = 'none';
+                } else {
+                    agentInfo.style.display = 'block';
+                }
+            });
+        });
+
+        var currentURL = window.location.href;
+        var url = new URL(currentURL);
+        var schedule = url.searchParams.get("schedule");
+        var departureAirports = url.searchParams.get("departureAirports").toUpperCase();
+        var arriveAirports = url.searchParams.get("arriveAirports").toUpperCase();
+        var departureDates = url.searchParams.get("departureDates");
+        var returnDates = url.searchParams.get("returnDates");
+
+        var direct_btn = document.querySelectorAll('.direct-btn');
+        direct_btn.forEach(function(button){
+            button.addEventListener('click', function(){
+                $.blockUI({
+                            message: '<img id="direct-img" src="https://side-project-flights-bucket.s3.ap-southeast-2.amazonaws.com/imgs/plane.gif"> </br> <p>正在為您導向至旅行社....</p> ' ,
+                            css: {
+                                border: 'none',
+                                padding: '15px',
+                                backgroundColor: '#000',
+                                '-webkit-border-radius': '10px',
+                                '-moz-border-radius': '10px',
+                                opacity: .5,
+                                color: '#000000',
+                                backgroundColor: '#FFFFFF'
+                                
+                            }  ,
+                            onBlock: null, 
+                            onUnblock: null 
+                        });
+                        setTimeout(function () {
+                            $.unblockUI(); 
+                        }, 10000);
+                var id = button.id.split("-")
+                var request_data;
+                if (schedule === "return")  {
+                    var agentName = id[0]
+                    var d_flightCode = id[1]
+                    var r_flight_code = id[2]
+                    request_data = {
+                        schedule: schedule,
+                        agent_name: agentName, 
+                        start_date: departureDates, 
+                        return_date: returnDates, 
+                        depart_at: departureAirports, 
+                        return_at: arriveAirports, 
+                        d_flight_code: d_flightCode, 
+                        r_flight_code: r_flight_code
+                        }
+                }
+                else if (schedule === "oneWay"){
+                    var agentName = id[0]
+                    var flightCode = id[1]
+                    request_data = {
+                        schedule: schedule,
+                        agent_name: agentName, 
+                        start_date: departureDates, 
+                        return_date: returnDates, 
+                        depart_at: departureAirports, 
+                        return_at: arriveAirports, 
+                        d_flight_code: flightCode, 
+                        r_flight_code: null
+                        }
+                }
+                
+                var getUrls = {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json'
+                        },
+                        body: JSON.stringify(request_data)
+                    }
+
+                fetch('/flight/agentUrl/get', getUrls)
+                    .then(function(response) {
+                        if (!response.ok) {
+                            throw new Error('Server response error');
+                            }
+                        return response.json(); 
+                    })
+                    .then(function(data){
+                        var direct_url = data.url
+                        window.location.href = direct_url;
+                    });
+                });
+        });
+
+        var far_btn = document.getElementById('favoriteBtn');
+        far_btn.addEventListener('click', function() {
+            var minPriceText = document.querySelectorAll('#item')[0].querySelector('#min-price').textContent;
+            var matches = minPriceText.match(/\d+/);
+            if (matches) {
+                    var minPrice = parseInt(matches[0], 10);
+                } else {
+                    var minPrice = null; 
+                }
+
+            let data = {};
+            if (schedule === "oneWay") {
+                data = {
+                    schedule: "oneWay",
+                    departAirport: departureAirports,
+                    arriveAirport: arriveAirports,
+                    departDate: departureDates,
+                    returnDates: null,
+                    minPrice: minPrice
+                }
+            }
+            else if (schedule === "return") {
+                data = {
+                    schedule: "return",
+                    departAirport: departureAirports,
+                    arriveAirport: arriveAirports,
+                    departDate: departureDates,
+                    returnDates: returnDates,
+                    minPrice: minPrice
+                }
+            }
+
+            fetch('/user/favorites/add', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
+            })       
+            swal("已為您追蹤票價！", "當最低價格變動時，將以e-mail通知", "success");
+        });
+
+    </script>
+    </body>
+</html>
