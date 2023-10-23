@@ -37,9 +37,9 @@ jobs:
         username: ec2-user
         key: ${{ secrets.SSH_KEY }}
         script: |
-          cd  /home/ec2-user/App
+          cd  /home/ec2-user/git_action
           git stash
-          git pull origin 
+          git pull origin CI/CD
 
     # Step 4     
     - name: Remove Github Actions IP from security group
