@@ -1,9 +1,14 @@
-from server import db
 import pandas as pd
 from datetime import datetime, timedelta
-from server.models.flight import get_airport_detail, check_data, get_utc_8_date
 from sqlalchemy import desc
 
+from server import db
+from server.models.flight import get_airport_detail, get_search_date
+
+AIRPORTS = {'MZG':'澎湖', 'KHH':'高雄', 'KNH':'金門', 
+            'RMQ':'台中', 'TSA':'台北', 'TNN':'台南',
+            'MFK':'馬祖', 'LZN':'馬祖(南竿)', 'TTT':'台東',
+            'HUN':'花蓮', 'CYI':'嘉義'}
 
 class PriceHistory(db.Model):
     __tablename__= "price_history"
@@ -46,13 +51,17 @@ class PriceChange(db.Model):
         self.change_range = change_range
         self.search_date= search_date
 
-#查特定出發地＋目的地在不同出發日的最低價格
+
 def get_price_trend():
+    """Get the lowest price for 
+        specific departures and destinations 
+        on different departure dates."""
+    
     db.session.commit()
-    today_date = get_utc_8_date()
+    search_date = get_search_date()
     query = PriceHistory.query.filter(
-                    PriceHistory.depart_date >= today_date,
-                    PriceHistory.search_date == today_date
+                    PriceHistory.depart_date >= search_date,
+                    PriceHistory.search_date == search_date
                 )
     result = query.all()
     data_list = []
@@ -66,8 +75,12 @@ def get_price_trend():
     df = pd.DataFrame.from_dict(data_list)
     return df
 
-#查歷史紀錄
+
 def get_price_record():
+    """Get the lowest prices for a specific departure location,
+        destination on different departure dates 
+        among different search dates."""
+    
     db.session.commit()
     result = PriceHistory.query.all()
     data_list = []
@@ -82,22 +95,9 @@ def get_price_record():
     df = pd.DataFrame.from_dict(data_list)
     return df
 
-airports = {'MZG':'澎湖', 'KHH':'高雄', 'KNH':'金門', 
-            'RMQ':'台中', 'TSA':'台北', 'TNN':'台南',
-            'MFK':'馬祖', 'LZN':'馬祖(南竿)', 'TTT':'台東',
-            'HUN':'花蓮', 'CYI':'嘉義'}
-
 def get_price_change_data():
-    check_if_exist_data = check_data()
-    if check_if_exist_data == True:
-         search_date = get_utc_8_date()
-    else:
-        date_str = get_utc_8_date()
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-        search_date_obj = date_obj - timedelta(days=1)
-        search_date = search_date_obj.strftime('%Y-%m-%d')
-    
     db.session.commit()
+    search_date = get_search_date()
     query = PriceChange.query.filter(
                     PriceChange.change_type == "drop",
                     PriceChange.change_range > 1,
@@ -106,12 +106,13 @@ def get_price_change_data():
     query = query.order_by(desc(PriceChange.change_range))
     query = query.limit(4)
     result = query.all()
+
     price_change_list = []
     for item in result:
         data = {}
-        data["arrive_airport"] = airports[item.arrive_airport_code]
+        data["arrive_airport"] = AIRPORTS[item.arrive_airport_code]
         data["arrive_airport_code"] = item.arrive_airport_code
-        data["depart_airport"] = airports[item.depart_airport_code]
+        data["depart_airport"] = AIRPORTS[item.depart_airport_code]
         data["depart_airport_code"] = item.depart_airport_code
         data["depart_date"] = item.depart_date.strftime('%Y-%m-%d')
         data["image"] = get_airport_detail(item.arrive_airport_code)["image"]
@@ -121,28 +122,34 @@ def get_price_change_data():
         cal_rate = abs(round((item.today_price-item.yesterday_price)/item.today_price, 2))
         data["change_rate"] = int(cal_rate * 100)
         price_change_list.append(data)
+    
     return price_change_list
 
+def get_next_week_date(search_date):
+    search_date_obj = datetime.strptime(search_date, "%Y-%m-%d")
+    next_week_obj = search_date_obj + timedelta(weeks=1)
+    next_week_date = next_week_obj.strftime('%Y-%m-%d')
+    return next_week_date
 
 def get_map_data():
     db.session.commit()
-    search_date_obj = datetime.strptime(get_utc_8_date(), "%Y-%m-%d")
-    next_week_obj = search_date_obj + timedelta(weeks=1)
-    depart_date = next_week_obj.strftime('%Y-%m-%d')
+    search_date = get_search_date()
+    depart_date = get_next_week_date(search_date)
     query = PriceHistory.query.filter(
                     PriceHistory.depart_airport_code == "TSA",
                     PriceHistory.depart_date == depart_date,
-                    PriceHistory.search_date == get_utc_8_date()
+                    PriceHistory.search_date == search_date
                 )
     query = query.order_by(PriceHistory.min_price)
     query = query.limit(3)
     result = query.all()
+
     destination_list = []
     for item in result:
         data = {}
-        data["arrive_airport"] = airports[item.arrive_airport_code]
+        data["arrive_airport"] = AIRPORTS[item.arrive_airport_code]
         data["arrive_airport_code"] = item.arrive_airport_code
-        data["depart_airport"] = airports[item.depart_airport_code]
+        data["depart_airport"] = AIRPORTS[item.depart_airport_code]
         data["depart_airport_code"] = item.depart_airport_code
         data["depart_date"] = item.depart_date.strftime('%Y-%m-%d')
         data["price"] = item.min_price

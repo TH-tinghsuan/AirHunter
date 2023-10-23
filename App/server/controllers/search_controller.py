@@ -1,11 +1,10 @@
-# from server import app, dash_app
-from server import app
+import json, os
 from flask import request,render_template, send_from_directory
+
+from server import app
 from server.models.flight import get_flights_info, get_airport_detail, get_flights_info_rt
 from server.controllers.agent_url import get_url_ezFly, get_url_ezTravel_oneWay, get_url_ezTravel_return, get_url_lifeTour, get_url_richmond
-import json, os
 from server.models.track import get_price_change_data, get_map_data
-from server.models.flight import get_airport_detail
 
 @app.route("/")
 @app.route("/home")
@@ -68,7 +67,14 @@ def get_flight_lists():
     
 @app.route("/flight/agentUrl/get", methods=["POST"])
 def get_agent_url():
-    """ reuqest data: agent_name, start_date, return_date, depart_at, return_at, d_flight_code, r_flight_code"""
+    """ reuqest data: agent_name, 
+                      start_date, 
+                      return_date, 
+                      depart_at, 
+                      return_at, 
+                      d_flight_code, 
+                      r_flight_code
+    """
     data = request.json
     schedule = data["schedule"]
     agent_name = data["agent_name"]
@@ -78,10 +84,11 @@ def get_agent_url():
     return_at = data["return_at"]
     d_flight_code = data["d_flight_code"]
     r_flight_code = data["r_flight_code"]
-    print(schedule, start_date, return_date, depart_at, return_at)
+    
     if agent_name == "ezFly":
         data = {"url": get_url_ezFly(schedule, depart_at, return_at, start_date, return_date)}
         return json.dumps(data, ensure_ascii=False)
+    
     elif agent_name == "ezTravel" and schedule == "return":
         data = {"url": get_url_ezTravel_return(start_date, return_date, depart_at, return_at, d_flight_code, r_flight_code)}
         return json.dumps(data, ensure_ascii=False)

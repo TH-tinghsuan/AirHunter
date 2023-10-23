@@ -1,10 +1,11 @@
-import requests, json
+import requests
+import json
 from datetime import datetime
 
-"""a function that get url if eztravel
-"""
+
 def format_date(date_string):
-    """parameter: %Y-%m-%d return %d/%m/%Y"""
+    """parameter: %Y-%m-%d 
+       return: %d/%m/%Y"""
     try:
         date_object = datetime.strptime(date_string, "%Y-%m-%d").date()
         formatted_date = date_object.strftime("%d/%m/%Y")
@@ -97,7 +98,6 @@ def get_url_ezTravel_return(start_date, return_date, depart_at, return_at, d_fli
     
     return url
 
-#test= get_url_ezTravel_return("04/12/2023", "08/12/2023", "TPE", "TTT","B78721", "B78722")
 def get_url_ezTravel_oneWay(depart_date, depart_at, arrive_at, flight_code):
     """date format: %d/%m/%Y"""
     formated_depart_date = format_date(depart_date)

@@ -1,8 +1,8 @@
-from server import db
-from sqlalchemy.sql import func
 import pandas as pd
 from datetime import datetime, timedelta
+from sqlalchemy.sql import func
 
+from server import db
 
 class FlightsDomestic(db.Model):
     __tablename__= "flights_domestic_main"
@@ -59,19 +59,26 @@ class Airport(db.Model):
         self.image = image
     
 
-def get_airline_detail(airlineName):
+def get_airline_detail(airline_name: str) -> dict:
     db.session.commit()
-    query = Airline.query.filter_by(name=airlineName)
-    airline_info = {"name": query[0].name, "airline_code": query[0].airline_code, "country": query[0].country, "images": query[0].images}
+    query = Airline.query.filter_by(name=airline_name)
+    airline_info = {"name": query[0].name, 
+                    "airline_code": query[0].airline_code, 
+                    "country": query[0].country, 
+                    "images": query[0].images}
     return airline_info
 
-def get_airport_detail(airport_code):
+def get_airport_detail(airport_code: str) -> dict:
     db.session.commit()
     query = Airport.query.filter_by(IATA_code=airport_code)
-    airport_info = {"airport_name": query[0].airport_name, "IATA_code": query[0].IATA_code, "city_name": query[0].city_name, "city_ID": query[0].city_ID, "image": query[0].image}
+    airport_info = {"airport_name": query[0].airport_name, 
+                    "IATA_code": query[0].IATA_code, 
+                    "city_name": query[0].city_name, 
+                    "city_ID": query[0].city_ID, 
+                    "image": query[0].image}
     return airport_info
 
-def get_utc_8_date():
+def get_utc_8_date() -> str:
     utc_date = datetime.utcnow()
     utc_8_date = utc_date + timedelta(hours=8)
     formatted_date = utc_8_date.strftime('%Y-%m-%d')
@@ -87,9 +94,7 @@ def check_data():
     else:
         return False
 
-
-def get_flights_info(search_arrive_airport_code, search_depart_airport_code, search_depart_time):
-    db.session.commit()
+def get_search_date() -> str:
     check_if_exist_data = check_data()
     if check_if_exist_data == True:
          search_date = get_utc_8_date()
@@ -98,6 +103,13 @@ def get_flights_info(search_arrive_airport_code, search_depart_airport_code, sea
         date_obj = datetime.strptime(date_str, "%Y-%m-%d")
         search_date_obj = date_obj - timedelta(days=1)
         search_date = search_date_obj.strftime('%Y-%m-%d')
+    return search_date
+
+
+def get_flights_info(search_arrive_airport_code: str, search_depart_airport_code: str, search_depart_time: datetime) ->dict:
+    db.session.commit()
+    search_date = get_search_date()
+
     query = db.session.query(
         FlightsDomestic.arrive_time,
         FlightsDomestic.depart_time,
@@ -130,7 +142,7 @@ def get_flights_info(search_arrive_airport_code, search_depart_airport_code, sea
     else:
         return "No data"
 
-def calcuate_duration(start_time, end_time):
+def calcuate_duration(start_time: datetime, end_time: datetime) -> str:
     time_difference = end_time - start_time
     days = time_difference.days
     seconds = time_difference.seconds
@@ -150,7 +162,12 @@ def get_non_empty_value(lst):
             return item
     return None
 
-def search_result_to_dict(flight_info):
+def get_ariline_name(airline_names: str) -> str:
+    airline_name_list = airline_names.split(",")
+    airline_name = get_non_empty_value(airline_name_list)
+    return airline_name
+
+def search_result_to_dict(flight_info: list) -> list:
     total = []
     for item in flight_info:
         return_json = {}
@@ -160,10 +177,9 @@ def search_result_to_dict(flight_info):
         return_json['depart_airport'] = get_airport_detail(item.depart_airport_code)
         return_json['arrive_time'] = item.arrive_time.strftime('%H:%M')
         return_json['arrive_airport'] = get_airport_detail(item.arrive_airport_code)
-        airlineName_list = item.airlineNames.split(",")
-        airlineName = get_non_empty_value(airlineName_list)
-        return_json["airline"] = airlineName
-        ariline_detail = get_airline_detail(airlineName)
+        airline_name = get_ariline_name(item.airlineNames)
+        return_json["airline"] = airline_name
+        ariline_detail = get_airline_detail(airline_name)
         return_json["flight_code"] = ariline_detail['airline_code'] +item.flightCodes.split(",")[0]
         return_json["airline_img"] = ariline_detail['images']
         return_json['items'] = []
@@ -179,16 +195,9 @@ def search_result_to_dict(flight_info):
         total.append(return_json)
     return sorted(total, key= lambda s: s["minPrice"])
 
-def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, search_depart_time, search_return_time):
+def get_flights_info_rt(search_arrive_airport_code: str, search_depart_airport_code: str, search_depart_time: datetime, search_return_time: datetime) -> dict:
     db.session.commit()
-    check_if_exist_data = check_data()
-    if check_if_exist_data == True:
-         search_date = get_utc_8_date()
-    else:
-        date_str = get_utc_8_date()
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-        search_date_obj = date_obj - timedelta(days=1)
-        search_date = search_date_obj.strftime('%Y-%m-%d')
+    search_date = get_search_date()
     subquery_A = (
     db.session.query(
         FlightsDomestic.depart_airport_code.label('A_depart_airport_code'),
@@ -271,7 +280,7 @@ def get_flights_info_rt(search_arrive_airport_code, search_depart_airport_code, 
         return "No data"
 
 
-def rt_search_result_to_dict(flight_info):
+def rt_search_result_to_dict(flight_info: list) -> list:
     total = []
     for item in flight_info:
         return_json = {}
@@ -310,16 +319,8 @@ def rt_search_result_to_dict(flight_info):
     return sorted(total, key= lambda s: s["minPrice"])   
 
 def get_price_df():
-    print("get_price_df")
     db.session.commit()
-    check_if_exist_data = check_data()
-    if check_if_exist_data == True:
-         search_date = get_utc_8_date()
-    else:
-        date_str = get_utc_8_date()
-        date_obj = datetime.strptime(date_str, "%Y-%m-%d")
-        search_date_obj = date_obj - timedelta(days=1)
-        search_date = search_date_obj.strftime('%Y-%m-%d')
+    search_date = get_search_date()
     query = (
         db.session.query(
             func.date(FlightsDomestic.depart_time).label('depart_date'),

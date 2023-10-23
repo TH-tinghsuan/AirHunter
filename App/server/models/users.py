@@ -1,8 +1,11 @@
-from server import db, login_manager
+
+from datetime import datetime, timedelta
 from flask_bcrypt import Bcrypt
 from flask_login import UserMixin
+
+from server import db, login_manager
 from server.models.flight import get_airport_detail
-from datetime import datetime, timedelta
+
 
 bcrypt = Bcrypt()
 
@@ -24,13 +27,13 @@ class User(db.Model, UserMixin):
         return bcrypt.check_password_hash(self.password, password)
 
 @login_manager.user_loader
-def load_user(user_id):
-    return User.query.get(user_id)
+def load_user(account):
+    return User.query.get(account)
 
-def get_user_name(account):
+def get_user_account(account: str) -> str:
     db.session.commit()
     user = User.query.filter_by(account=account).first()
-    return user.username
+    return user.account
 
 class UserFavorite(db.Model):
     __tablename__ = 'user_favorites'
@@ -55,16 +58,24 @@ class UserFavorite(db.Model):
         self.active = active
 
 
-def create_user_fav(data):
+def create_user_fav(data: dict):
     """
         insert a record into user_favorites table, if it already exist, set active to True
-        parameter shoule be dictionary with key='user_id', 'arrive_airport_code', 
-                 'depart_airport_code', 'depart_date', 'return_date', 'schedule', 'min_price'
+        parameter: {'user_id': "", 
+                    'arrive_airport_code': "", 
+                    'depart_airport_code': "", 
+                    'depart_date': "", 
+                    'return_date': "", 
+                    'schedule': "", 
+                    'min_price': ""}
     """
     db.session.commit()
-    query = UserFavorite.query.filter_by(user_id = data['user_id'],depart_airport_code=data['depart_airport_code'],
-                                         arrive_airport_code = data['arrive_airport_code'], depart_date=data['depart_date'],
-                                         return_date = data['return_date'], schedule=data['schedule']).first()
+    query = UserFavorite.query.filter_by(user_id = data['user_id'],
+                                         depart_airport_code=data['depart_airport_code'],
+                                         arrive_airport_code = data['arrive_airport_code'], 
+                                         depart_date=data['depart_date'],
+                                         return_date = data['return_date'], 
+                                         schedule=data['schedule']).first()
     if not query:
         user_fav_model = UserFavorite(**data) 
         db.session.add(user_fav_model)
@@ -74,16 +85,22 @@ def create_user_fav(data):
         db.session.commit() 
 
         
-def del_user_fav(data):
+def del_user_fav(data: dict):
     """
         set a record in user_favorites table as inactive.
-        parameter shoule be dictionary with key='user_id', 'arrive_airport_code', 
-                 'arrive_time', 'depart_airport_code', 'depart_time'
+        parameter: {'user_id': "", 
+                    'arrive_airport_code': "", 
+                    'arrive_time': "", 
+                    'depart_airport_code': "", 
+                    'depart_time': ""}
     """
     db.session.commit()
-    query = UserFavorite.query.filter_by(user_id = data['user_id'],depart_airport_code=data['depart_airport_code'],
-                                         arrive_airport_code = data['arrive_airport_code'], depart_date=data['depart_date'],
-                                         return_date = data['return_date'], schedule=data['schedule'])
+    query = UserFavorite.query.filter_by(user_id = data['user_id'],
+                                         depart_airport_code=data['depart_airport_code'],
+                                         arrive_airport_code = data['arrive_airport_code'], 
+                                         depart_date=data['depart_date'],
+                                         return_date = data['return_date'], 
+                                         schedule=data['schedule'])
     
     query.update({"active": False})
     db.session.commit()
@@ -94,13 +111,15 @@ def get_utc_8_date():
     formatted_date = utc_8_date.strftime('%Y-%m-%d')
     return formatted_date
 
-def get_user_fav(userID):
+def get_user_fav(userID: str) -> list:
     """
         retrieve a user's favorite list by user ID.
     """
     db.session.commit()
     today = get_utc_8_date()
-    query = UserFavorite.query.filter(UserFavorite.user_id == userID, UserFavorite.depart_date >= today, UserFavorite.active==True).all()
+    query = UserFavorite.query.filter(UserFavorite.user_id == userID, 
+                                      UserFavorite.depart_date >= today, 
+                                      UserFavorite.active==True).all()
     fav_list = []
     for item in query:
         fav = {}

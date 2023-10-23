@@ -1,12 +1,13 @@
+import os
+import json
+from datetime import datetime, timedelta
+from dotenv import load_dotenv
+
 from airflow.decorators import dag
 from airflow.operators.empty import EmptyOperator
-from airflow.operators.python import PythonOperator, BranchPythonOperator
+from airflow.operators.python import PythonOperator
 from airflow.providers.amazon.aws.hooks.sqs import SqsHook
-from airflow.models import XCom
-from datetime import datetime, timedelta
-import json
-from dotenv import load_dotenv
-import os
+
 from modules.transfer import (
     clean_data_lifetour, 
     clean_data_richmond, 

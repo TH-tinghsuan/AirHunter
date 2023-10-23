@@ -1,0 +1,120 @@
+body {
+    font-family: Arial, sans-serif;
+    background-color: #f2f2f2;
+    margin: 0;
+    padding: 0;
+}
+
+.container {
+            box-sizing: border-box;
+            padding-left: 2%;
+            padding-right: 2%;
+            background-color:white;
+        }
+        .navbar {
+            display: flex;
+            align-items: center;
+        }
+
+        ul > li > a {
+            font-size: 18px;
+            color: dimgrey;
+        }
+
+        ul > li > a:hover {
+            font-size: 18px;
+            color: grey;
+        }
+
+        nav {
+            margin-left: auto; 
+        }
+        nav ul li {
+            display: inline;
+            margin-left: 15px;
+            list-style: none;   
+        }
+        #logo-img {
+            height: 33px;
+            width: 158px;
+            padding: 5px;
+        }
+        a {
+            text-decoration:none;
+            color: black;
+        }
+
+h1 {
+    text-align: center;
+    color: #333;
+}
+
+h2 {
+
+    text-align: center;
+    color:#007bff;    
+}
+
+#fav-item {
+    position: relative;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2); 
+    align-items: center;
+}
+
+#fav-item:hover {
+    position: relative;
+    max-width: 400px;
+    margin: 20px auto;
+    background-color: #fff;
+    padding: 20px;
+    border-radius: 5px;
+    box-shadow: 0px 0px 20px rgba(0, 0, 0, 0.4); 
+    align-items: center;
+}
+
+span {
+    padding: 5px;
+}
+
+#remove-fav-img {
+    height: 20px;
+    width: 20px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#remove-fav-img:hover {
+    height: 22px;
+    width: 22px;
+    position: absolute;
+    top: 10px;
+    right: 10px;
+}
+
+#link-detail {
+    font-size: 15px;
+    color: white;
+    border-radius: 5px;
+    background-color: #769FCD;
+    padding: 5px;
+    position: absolute;
+    bottom: 10px;
+    right: 10px;
+    text-decoration:none;
+}
+
+.text {
+    padding: 5px 10px;
+}
+.schedule {
+    background-color: lightgrey; 
+    padding: 5px 8px; 
+    font-size: 12px; 
+    border-radius: 5px;
+}
