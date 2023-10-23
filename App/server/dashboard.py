@@ -183,46 +183,53 @@ with app.app_context():
 
         return[destination_map.get(selected_depart, []), None]
     
-
-    @dash_app.callback(
-        [Output("avg-price-chart", "figure"), Output("price-trend-chart", "figure"),
-         Output("avg-price-chart-title", "children"), Output("price-trend-chart-title", "children")],
-        [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")])
-    def update_charts(selected_depart, selected_arrive):
-        def get_filterd_df(dataframe):
+    def get_filterd_df(dataframe, selected_depart, selected_arrive):
             condition = (dataframe["出發地"] == selected_depart) & (dataframe["目的地"] == selected_arrive)
             df_filtered = dataframe[condition]
             return df_filtered
-        
-        df_avg_price = get_price_df()
-        df_price_trend = get_price_trend()
-        fig_avg_price = px.line(get_filterd_df(df_avg_price), x='出發日', y= '平均價格', color='旅行社')
-        fig_price_trend = px.bar(get_filterd_df(df_price_trend), x='出發日', y= '最低價格')
-        
+    
+    @dash_app.callback(
+            [Output("avg-price-chart-title", "children"), Output("price-trend-chart-title", "children"), Output("price-history-chart-title", "children")],
+            [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")]
+     )
+    def update_title(selected_depart, selected_arrive):
         if selected_depart is not None and selected_arrive is not None:
             title1 = f"{AIRPORTS[selected_depart]} - {AIRPORTS[selected_arrive]} 機票平均價格"
             title2 = f"{AIRPORTS[selected_depart]} - {AIRPORTS[selected_arrive]} 票價趨勢"
-            
+            title3 = f"{AIRPORTS[selected_depart]} - {AIRPORTS[selected_arrive]} 票價紀錄"
         else:
             title1 = "機票平均價格"
             title2 = "票價趨勢"
+            title3 = "票價紀錄"
             
+        return [title1, title2, title3]
+
+    @dash_app.callback(
+         Output("avg-price-chart", "figure"),
+        [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")])
+    def update_charts(selected_depart, selected_arrive):
+        df_avg_price = get_filterd_df(get_price_df(), selected_depart, selected_arrive)
+        fig_avg_price = px.line(df_avg_price, x='出發日', y= '平均價格', color='旅行社')
             
-        return [fig_avg_price, fig_price_trend, title1, title2]
+        return fig_avg_price
     
-@dash_app.callback([Output("price-history-chart", "figure"), Output("price-history-chart-title", "children")],
-                   [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value"), Input('date-range-picker', 'date')])
-def update_price_history_chart(selected_depart, selected_arrive, date_value):
-    df_price_record = get_price_record()
-    df_price_record_condition = (df_price_record["出發地"] == selected_depart) & (df_price_record["目的地"] == selected_arrive) & (df_price_record["出發日"] == date_value)
-    filtered_fig = df_price_record[df_price_record_condition]
-    filtered_fig['搜尋時間_x'] = [(str((datetime.today().date() - item).days)  + "天前")if (datetime.today().date() -item).days > 0 else "今天" for item in filtered_fig['搜尋時間']]
-    fig_price_record = px.line(filtered_fig, x='搜尋時間_x', y= '最低價格', labels={'搜尋時間_x':'搜尋時間'})
+    @dash_app.callback(
+         Output("price-trend-chart", "figure"),
+        [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")])
+    def update_charts(selected_depart, selected_arrive):
+        df_price_trend = get_filterd_df(get_price_trend(), selected_depart, selected_arrive)
+        fig_price_trend = px.bar(df_price_trend, x='出發日', y= '最低價格')
+
+        return fig_price_trend
     
-    if selected_depart is not None and selected_arrive is not None:
-        title = f"{AIRPORTS[selected_depart]} - {AIRPORTS[selected_arrive]} 票價紀錄"
-    else:
-        title = "票價紀錄"
-    
-    return [fig_price_record, title]
+    @dash_app.callback(Output("price-history-chart", "figure"),
+                    [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value"), Input('date-range-picker', 'date')])
+    def update_price_history_chart(selected_depart, selected_arrive, date_value):
+        df_price_record = get_price_record()
+        df_price_record_condition = (df_price_record["出發地"] == selected_depart) & (df_price_record["目的地"] == selected_arrive) & (df_price_record["出發日"] == date_value)
+        filtered_fig = df_price_record[df_price_record_condition]
+        filtered_fig['搜尋時間_x'] = [(str((datetime.today().date() - item).days)  + "天前")if (datetime.today().date() -item).days > 0 else "今天" for item in filtered_fig['搜尋時間']]
+        fig_price_record = px.line(filtered_fig, x='搜尋時間_x', y= '最低價格', labels={'搜尋時間_x':'搜尋時間'})
+        
+        return fig_price_record
 
