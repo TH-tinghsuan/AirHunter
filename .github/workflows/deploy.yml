@@ -40,6 +40,9 @@ jobs:
           cd  /home/ec2-user/git_action
           git stash
           git pull origin CI/CD
+          cd  App
+          conda activate side_project_flights
+          screen -d -m python3 main.py
 
     # Step 4     
     - name: Remove Github Actions IP from security group
