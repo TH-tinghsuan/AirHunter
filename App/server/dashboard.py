@@ -1,15 +1,28 @@
 import dash
 import plotly.express as px
+import pandas as pd
+import os
+from dotenv import load_dotenv
 from dash import dcc, html, Input, Output, callback
 from datetime import date, datetime, timedelta
+from flask_caching import Cache
 
 from server import app
 from server.models.track import get_price_trend, get_price_record
 from server.models.flight import get_price_df
 
+load_dotenv()
 
 dash_app = dash.Dash(__name__, server=app, url_base_pathname='/dashboard/')
 dash_app.title = "AirHunter | 票價趨勢查詢"
+
+cache = Cache(dash_app.server, config={
+    'CACHE_TYPE': 'filesystem',
+    'CACHE_DIR': os.environ.get("CACHE_DIR"),
+    'CACHE_THRESHOLD': 20
+})
+
+TIMEOUT = 60*60*60
 
 DEPART_OPTIONS = [
     {"label": "台北", "value": "TSA"},
@@ -188,6 +201,30 @@ with app.app_context():
             df_filtered = dataframe[condition]
             return df_filtered
     
+    @cache.memoize(timeout=TIMEOUT)
+    def query_avg_price_chart():
+        df_price_df = get_price_df()
+        return df_price_df.to_json(date_format='iso', orient='split')
+
+    @cache.memoize(timeout=TIMEOUT)
+    def query_price_trend_chart():
+        df_price_df = get_price_trend()
+        return df_price_df.to_json(date_format='iso', orient='split')
+    
+    @cache.memoize(timeout=TIMEOUT)
+    def query_price_record_chart():
+        df_price_df = get_price_record()
+        return df_price_df.to_json(date_format='iso', orient='split')
+    
+    def get_avg_price_df():
+        return pd.read_json(query_avg_price_chart(), orient='split')
+    
+    def get_price_trend_df():
+        return pd.read_json(query_price_trend_chart(), orient='split')
+    
+    def get_price_record_df():
+        return pd.read_json(query_price_record_chart(), orient='split')
+
     @dash_app.callback(
             [Output("avg-price-chart-title", "children"), Output("price-trend-chart-title", "children"), Output("price-history-chart-title", "children")],
             [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")]
@@ -207,17 +244,17 @@ with app.app_context():
     @dash_app.callback(
          Output("avg-price-chart", "figure"),
         [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")])
-    def update_charts(selected_depart, selected_arrive):
-        df_avg_price = get_filterd_df(get_price_df(), selected_depart, selected_arrive)
+    def update_avg_price_chart(selected_depart, selected_arrive):
+        df_avg_price = get_filterd_df(get_avg_price_df(), selected_depart, selected_arrive)
         fig_avg_price = px.line(df_avg_price, x='出發日', y= '平均價格', color='旅行社')
-            
+        
         return fig_avg_price
     
     @dash_app.callback(
          Output("price-trend-chart", "figure"),
         [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value")])
-    def update_charts(selected_depart, selected_arrive):
-        df_price_trend = get_filterd_df(get_price_trend(), selected_depart, selected_arrive)
+    def update_price_trend_chart(selected_depart, selected_arrive):
+        df_price_trend = get_filterd_df(get_price_trend_df(), selected_depart, selected_arrive)
         fig_price_trend = px.bar(df_price_trend, x='出發日', y= '最低價格')
 
         return fig_price_trend
@@ -225,11 +262,12 @@ with app.app_context():
     @dash_app.callback(Output("price-history-chart", "figure"),
                     [Input("depart-dropdown", "value"), Input("arrive-dropdown", "value"), Input('date-range-picker', 'date')])
     def update_price_history_chart(selected_depart, selected_arrive, date_value):
-        df_price_record = get_price_record()
-        df_price_record_condition = (df_price_record["出發地"] == selected_depart) & (df_price_record["目的地"] == selected_arrive) & (df_price_record["出發日"] == date_value)
-        filtered_fig = df_price_record[df_price_record_condition]
-        filtered_fig['搜尋時間_x'] = [(str((datetime.today().date() - item).days)  + "天前")if (datetime.today().date() -item).days > 0 else "今天" for item in filtered_fig['搜尋時間']]
-        fig_price_record = px.line(filtered_fig, x='搜尋時間_x', y= '最低價格', labels={'搜尋時間_x':'搜尋時間'})
+        df_price_record =get_price_record_df()
+        depart_date = datetime.strptime(date_value, '%Y-%m-%d')
+        df_price_record["出發日"] = pd.to_datetime(df_price_record["出發日"])
+        df_price_record["搜尋時間"] = pd.to_datetime(df_price_record["搜尋時間"])
+        filtered_fig = df_price_record[(df_price_record["出發地"] == selected_depart)&(df_price_record["目的地"] == selected_arrive)& (df_price_record["出發日"] == depart_date)]
+        fig_price_record = px.line(filtered_fig, x='搜尋時間', y= '最低價格')
         
         return fig_price_record
 

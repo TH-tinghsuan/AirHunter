@@ -48,7 +48,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <input type="text" id="from" name="account" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('');" oninvalid="setCustomValidity('請輸入有效的電子郵件格式');"><br>
+        <input type="text" id="from" name="account" value="test_account_123@gmail.com" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('');" oninvalid="setCustomValidity('請輸入有效的電子郵件格式');"><br>
         <label for="to">密碼</label>
         {% with messages = get_flashed_messages(with_categories=True, category_filter=['password']) %}
         {% if messages %}
@@ -57,7 +57,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <input type="password" id="to" name="password" required><br>
+        <input type="password" id="to" name="password" value="abc123" required><br>
         <p>還沒有帳號嗎？點此<a href="/user/signup" style="color: #007bff;">加入會員</a></p>
         <input type="hidden" name="next" value="{{ next }}">
         <button type="submit">登入</button>

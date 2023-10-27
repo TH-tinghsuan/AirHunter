@@ -88,7 +88,7 @@ def get_price_record():
         data = {}
         data['出發地'] = item.depart_airport_code
         data['目的地'] = item.arrive_airport_code
-        data['搜尋時間'] = item.search_date.date()
+        data['搜尋時間'] = item.search_date
         data['最低價格'] = item.min_price
         data['出發日'] = item.depart_date
         data_list.append(data)
