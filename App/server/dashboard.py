@@ -143,7 +143,7 @@ with app.app_context():
                                     html.Div([
                                         html.P("Contact me", style={"color": "white"}),
                                         html.A("Github", href="https://github.com/TH-tinghsuan", style={"color": "white", "border": "solid white 0.5px", "padding": "2px", "border-radius": "5px"}),
-                                        html.A("Linkedin", href="#", style={"color": "white", "border": "solid white 0.5px", "padding": "2px", "border-radius": "5px"})
+                                        html.A("Linkedin", href="https://www.linkedin.com/in/ting-hsuan-lin-林庭萱-1509b31aa/", style={"color": "white", "border": "solid white 0.5px", "padding": "2px", "border-radius": "5px"})
                                     ], className="web-info"),
 
                                     html.Div([
