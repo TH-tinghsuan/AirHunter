@@ -3,6 +3,8 @@ name: CI/CD Pipeline Deploy to AWS/EC2 - website
 run-name: Deploy to AWS/EC2 by @${{ github.actor }}
 on:
   pull_request:
+    types:
+      - closed
     branches:
       - main
 jobs:
