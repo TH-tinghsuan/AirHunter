@@ -3,7 +3,6 @@ from config import Config
 from dotenv import load_dotenv
 from flask_login import LoginManager
 from flask_sqlalchemy import SQLAlchemy
-from dash import Dash
 
 load_dotenv()
 

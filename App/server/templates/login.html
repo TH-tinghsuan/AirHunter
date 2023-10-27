@@ -3,100 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <link rel="stylesheet" href="/static/login.css">
     <title>登入</title>
-    <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f2f2f2;
-            margin: 0;
-            padding: 0;
-        }
-
-        .container {
-                    box-sizing: border-box;
-                    padding-left: 2%;
-                    padding-right: 2%;
-                    background-color:white;
-                }
-                .navbar {
-                    display: flex;
-                    align-items: center;
-                }
-
-                ul > li > a {
-                    font-size: 18px;
-                    color: dimgrey;
-                }
-
-                ul > li > a:hover {
-                    font-size: 18px;
-                    color: grey;
-                }
-
-                nav {
-                    margin-left: auto; 
-                }
-                nav ul li {
-                    display: inline;
-                    margin-left: 15px;
-                    list-style: none;   
-                }
-                img {
-                    height: 33px;
-                    width: 158px;
-                    padding: 5px;
-                }
-                a {
-                    text-decoration:none;
-                    color: black;
-                }
-
-        h1 {
-            text-align: center;
-            color: #333;
-        }
-
-        form {
-            max-width: 400px;
-            margin: 20px auto;
-            background-color: #fff;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0px 0px 10px rgba(0, 0, 0, 0.2);
-        }
-
-        label {
-            display: block;
-            margin-bottom: 5px;
-            font-weight: bold;
-            color: #333;
-        }
-
-        input[type="text"],
-        input[type="password"],
-        select {
-            width: 90%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ccc;
-            border-radius: 3px;
-            font-size: 15px;
-        }
-
-        button[type="submit"] {
-            background-color: #007bff;
-            color: #fff;
-            border: none;
-            padding: 10px 20px;
-            border-radius: 3px;
-            cursor: pointer;
-        }
-
-        button[type="submit"]:hover {
-            background-color: #0056b3;
-        }
-
-    </style>
 </head>
 <body>
     <div class="container">
@@ -140,7 +48,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <input type="text" id="from" name="account" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('');" oninvalid="setCustomValidity('請輸入有效的電子郵件格式');"><br>
+        <input type="text" id="from" name="account" value="test_account_123@gmail.com" required pattern="[a-z0-9._%+-]+@[a-z0-9.-]+\.[a-z]{2,4}$" oninput="setCustomValidity('');" oninvalid="setCustomValidity('請輸入有效的電子郵件格式');"><br>
         <label for="to">密碼</label>
         {% with messages = get_flashed_messages(with_categories=True, category_filter=['password']) %}
         {% if messages %}
@@ -149,7 +57,7 @@
         {% endfor %}
         {% endif %}
         {% endwith %}
-        <input type="password" id="to" name="password" required><br>
+        <input type="password" id="to" name="password" value="abc123" required><br>
         <p>還沒有帳號嗎？點此<a href="/user/signup" style="color: #007bff;">加入會員</a></p>
         <input type="hidden" name="next" value="{{ next }}">
         <button type="submit">登入</button>

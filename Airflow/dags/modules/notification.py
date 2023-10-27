@@ -1,23 +1,30 @@
+import os
+import logging
+import smtplib
+
 from email.mime.multipart import MIMEMultipart
 from email.mime.text import MIMEText
-import smtplib
-import os
 
-def send_noti_email(title, email_content, receiver):
+logging.basicConfig(level=logging.INFO)
+
+def send_noti_email(title: str, email_content: str, receiver: str, is_html=False):
     content = MIMEMultipart() 
 
     content["subject"] = title
-    content["from"] = "airhunter.biz@gmail.com"  #寄件者
-    content["to"] = receiver #收件者
+    content["from"] = "airhunter.biz@gmail.com"  #sender
+    content["to"] = receiver #receiver
     
-    content.attach(MIMEText(email_content))
+    if is_html:
+        content.attach(MIMEText(email_content, "html"))
+    else:
+        content.attach(MIMEText(email_content, "plain"))
 
-    with smtplib.SMTP(host="smtp.gmail.com", port="587") as smtp:  # 設定SMTP伺服器
+    with smtplib.SMTP(host="smtp.gmail.com", port="587") as smtp:  # setup SMTP server
         try:
-            smtp.ehlo()  # 驗證SMTP伺服器
-            smtp.starttls()  # 建立加密傳輸
-            smtp.login("airhunter.biz@gmail.com", os.getenv("GOOGLE_EMAIL"))  # 登入寄件者gmail
-            smtp.send_message(content)  # 寄送郵件
-            print(f"Complete!, email: {receiver}")
+            smtp.ehlo()  # verify SMTP server
+            smtp.starttls()  
+            smtp.login("airhunter.biz@gmail.com", os.getenv("GOOGLE_EMAIL"))  # log in sender's gmail
+            smtp.send_message(content)  # send email
+            logging.info(f"Complete!, email: {receiver}, title: {title}")
         except Exception as e:
-            print("Error message: ", e)
+            logging.error("Error message: ", e)

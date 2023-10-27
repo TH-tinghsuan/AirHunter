@@ -1,11 +1,13 @@
+from datetime import datetime, timedelta
+
 from airflow.decorators import dag
 from airflow.operators.empty import EmptyOperator
 from airflow.operators.python import PythonOperator
-from airflow.providers.amazon.aws.hooks.s3 import S3Hook
 from airflow.models import Variable
-from datetime import datetime, timedelta
-from modules.crawler import lifetour_scraper, richmond_crawler, ezTravel_crawler, ezFly_crawler
-from modules.transfer import insert_to_main_table, get_old_price_history_data, insert_to_price_history, compare_price_difference, send_notification
+
+from modules.crawler import scrape_and_upload_s3, get_lifeTour_raw_data, get_ezFly_raw_data, get_ezTravel_raw_data, get_richmond_raw_data
+from modules.transfer import insert_to_main_table
+from modules.price_compare import get_old_price_history_data, insert_to_price_history, compare_price_difference, send_notification, compare_price_by_date
 from modules.notification import send_noti_email
 
 class TaskID:
@@ -26,6 +28,7 @@ class TaskID:
     get_old_price_history_task_id = "get_old_price_history"
     insert_to_price_history_task_id = "insert_to_price_history"
     compare_price_diff_task_id = "compare_price_difference"
+    compare_price_by_date_task_id = "compare_price_by_date"
     send_price_notification_task_id = "send_price_notification"
 
 def get_utc_8_date(**kwargs):
@@ -74,64 +77,64 @@ def crawler_dag_all_test():
                                 provide_context=True)
     
     lifeTour_crawl_task_1 = PythonOperator(task_id=TaskID.lf_crawler_task_1_id,
-                                python_callable=lifetour_scraper,
+                                python_callable=scrape_and_upload_s3,
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True, 
-                                op_kwargs = {"start_date": current_date, "total_dates": 20})
+                                op_kwargs = {"start_date": current_date, "total_dates": 20, "fun_name":get_lifeTour_raw_data, "agent_name": "lifeTour"})
     
     lifeTour_crawl_task_2 = PythonOperator(task_id=TaskID.lf_crawler_task_2_id,
-                                python_callable=lifetour_scraper, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20})
+                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20, "fun_name":get_lifeTour_raw_data, "agent_name": "lifeTour"})
     
     lifeTour_crawl_task_3 = PythonOperator(task_id=TaskID.lf_crawler_task_3_id,
-                                python_callable=lifetour_scraper, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21})
+                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21, "fun_name":get_lifeTour_raw_data, "agent_name": "lifeTour"})
     
     richmond_crawl_task_1 = PythonOperator(task_id=TaskID.rh_crawler_task_1_id,
-                                python_callable=richmond_crawler, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date, "total_dates": 20})
+                                op_kwargs = {"start_date": current_date, "total_dates": 20, "fun_name":get_richmond_raw_data, "agent_name": "richmond"})
     
     richmond_crawl_task_2 = PythonOperator(task_id=TaskID.rh_crawler_task_2_id,
-                                python_callable=richmond_crawler,
+                                python_callable=scrape_and_upload_s3,
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True, 
-                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20})
+                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20, "fun_name":get_richmond_raw_data, "agent_name": "richmond"})
     
     richmond_crawl_task_3 = PythonOperator(task_id=TaskID.rh_crawler_task_3_id,
-                                python_callable=richmond_crawler, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21})
+                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21, "fun_name":get_richmond_raw_data, "agent_name": "richmond"})
     
     ezTravel_crawl_task_1 = PythonOperator(task_id=TaskID.ezT_crawler_task_1_id,
-                                python_callable=ezTravel_crawler, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date, "total_dates": 60})
+                                op_kwargs = {"start_date": current_date, "total_dates": 60, "fun_name":get_ezTravel_raw_data, "agent_name": "ezTravel"})
    
     ezFly_crawl_task_1 = PythonOperator(task_id=TaskID.ezF_crawler_task_1_id,
-                                python_callable=ezFly_crawler, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date, "total_dates": 20})
+                                op_kwargs = {"start_date": current_date, "total_dates": 20, "fun_name":get_ezFly_raw_data, "agent_name": "ezFly"})
     
     ezFly_crawl_task_2 = PythonOperator(task_id=TaskID.ezF_crawler_task_2_id,
-                                python_callable=ezFly_crawler,
+                                python_callable=scrape_and_upload_s3,
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True, 
-                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20})
+                                op_kwargs = {"start_date": current_date + timedelta(days=20), "total_dates": 20, "fun_name":get_ezFly_raw_data, "agent_name": "ezFly"})
     
     ezFly_crawl_task_3 = PythonOperator(task_id=TaskID.ezF_crawler_task_3_id,
-                                python_callable=ezFly_crawler, 
+                                python_callable=scrape_and_upload_s3, 
                                 on_failure_callback=notify_on_failure,
                                 provide_context=True,
-                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21})
+                                op_kwargs = {"start_date": current_date + timedelta(days=40), "total_dates": 21, "fun_name":get_ezFly_raw_data, "agent_name": "ezFly"})
 
     insert_to_main_table_task = PythonOperator(task_id=TaskID.insert_to_main_table_task_id,
                                 python_callable=insert_to_main_table,
@@ -159,6 +162,13 @@ def crawler_dag_all_test():
                                 on_failure_callback=notify_on_failure,
                                 retries=3,
                                 retry_delay=timedelta(minutes=1))
+    
+    compare_price_by_date_task = PythonOperator(task_id=TaskID.compare_price_by_date_task_id,
+                                python_callable=compare_price_by_date,
+                                provide_context=True,
+                                on_failure_callback=notify_on_failure,
+                                retries=3,
+                                retry_delay=timedelta(minutes=1))
 
     send_price_notification_task = PythonOperator(task_id=TaskID.send_price_notification_task_id,
                                 python_callable=send_notification,
@@ -170,9 +180,12 @@ def crawler_dag_all_test():
 
     end_task = EmptyOperator(task_id=TaskID.end_task_id)
 
+    start_task >> get_search_date_task >> end_task
+
     start_task >> get_search_date_task >> [lifeTour_crawl_task_1, lifeTour_crawl_task_2, lifeTour_crawl_task_3,
                    richmond_crawl_task_1, richmond_crawl_task_2, richmond_crawl_task_3,
                    ezTravel_crawl_task_1, 
-                   ezFly_crawl_task_1, ezFly_crawl_task_2, ezFly_crawl_task_3] >> insert_to_main_table_task >> get_old_price_history_task >> insert_to_price_history_task >> compare_price_diff_task >>  send_price_notification_task>> end_task
+                   ezFly_crawl_task_1, ezFly_crawl_task_2, ezFly_crawl_task_3] >> insert_to_main_table_task >> get_old_price_history_task >> insert_to_price_history_task >> compare_price_diff_task >>  compare_price_by_date_task >> send_price_notification_task>> end_task
     
 create_dag = crawler_dag_all_test()
+
