@@ -1,0 +1,58 @@
+name: CI/CD Pipeline Deploy to AWS/EC2 - website
+
+run-name: Deploy to AWS/EC2 by @${{ github.actor }}
+on:
+  pull_request:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    steps:
+    # Step 1
+    - name: Checkout to repo
+      uses: actions/checkout@v2
+
+    - name: Get Github action IP
+      id: ip
+      uses: haythem/public-ip@v1.2
+    
+    # Step 2
+    - name: Add Github Actions IP to Security group
+      run:
+        aws ec2 authorize-security-group-ingress --group-name ${{ secrets.AWS_SG_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32    
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+
+    # Step 3  
+    - name: Deploy to prod server
+      uses: appleboy/ssh-action@master
+      with:
+        host: ${{ secrets.HOST_IP }}
+        username: ec2-user
+        key: ${{ secrets.SSH_KEY }}
+        script: |
+          screen -XS flask_server quit
+          cd  /home/ec2-user/git_action
+          git stash
+          git pull origin main
+          cd  App
+          conda activate side_project_flights
+          screen -d -m -S flask_server python3 main.py
+
+    # Step 4     
+    - name: Remove Github Actions IP from security group
+      run: |
+        aws ec2 revoke-security-group-ingress --group-name ${{ secrets.AWS_SG_NAME }} --protocol tcp --port 22 --cidr ${{ steps.ip.outputs.ipv4 }}/32
+      env:
+        AWS_ACCESS_KEY_ID: ${{ secrets.AWS_ACCESS_KEY_ID }}
+        AWS_SECRET_ACCESS_KEY: ${{ secrets.AWS_SECRET_ACCESS_KEY }}
+        AWS_DEFAULT_REGION: ${{ secrets.AWS_DEFAULT_REGION }}
+      if: always()
+
+    # Step 5
+    - name: Post-deployment notification
+      run: echo "🎉 Job Deploy ${{ job.status }}."
+      if: success()
