@@ -12,7 +12,7 @@ Scraping data from four travel agent websites, processing it using ETL, and stor
 #### Web Server
 Bulit the web base on Flask framework, and used Nginx as a revers proxy server.
 
-![framework](https://github.com/TH-tinghsuan/AirHunter/assets/134147328/dd1ab469-388c-4af9-91e5-142d8af9f6c3)
+![framework_img](https://github.com/TH-tinghsuan/AirHunter/assets/134147328/a9bba011-d884-4815-9021-1926df6996c5)
 
 ## Data Pipeline
 <p align="center">
