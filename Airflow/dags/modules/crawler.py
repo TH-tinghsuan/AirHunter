@@ -127,13 +127,6 @@ def get_ezFly_Guid(dp_ct_name: str, ar_ct_name: str, dp_date: str) -> str:
 
 def get_ezFly_raw_data(depart_airport: str, arrive_airport: str, date: str) -> dict:
     guid = get_ezFly_Guid(depart_airport, arrive_airport, date)
-    if not guid:
-        for _ in range(3): # try up to 3 times to get Guid
-            guid = get_ezFly_Guid(depart_airport, arrive_airport, date)
-            if guid:
-                break
-            time.sleep(10)
-
     if guid:
         form_data = {"SegmentTrip": "GO",
                     "DepartureAirport": depart_airport,
