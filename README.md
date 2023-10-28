@@ -3,7 +3,7 @@ Welcome to my project! This is a website made in Python and Flask framework. Wit
 Additionally, it features a dashboard that visually represents fare data, offering users a comprehensive view of price trends.
 
 - Website: https://www.airhunter.biz/
-![image](https://github.com/TH-tinghsuan/git_practice/assets/134147328/e1695560-22c1-4205-8ef6-dede3e61f676)
+<img width="1415" alt="home_page" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/28de36f9-c878-4f02-8ecc-7cc921815743">
 
 ## Project Framework
 The project framework can be divided into two main components: the data pipeline and the web server.
@@ -12,7 +12,7 @@ Scraping data from four travel agent websites, processing it using ETL, and stor
 #### Web Server
 Bulit the web base on Flask framework, and used Nginx as a revers proxy server.
 
-![image](https://github.com/TH-tinghsuan/git_practice/assets/134147328/bf6599e5-769e-4dbd-ab27-a1c1bd538078)
+![framework](https://github.com/TH-tinghsuan/AirHunter/assets/134147328/dd1ab469-388c-4af9-91e5-142d8af9f6c3)
 
 ## Data Pipeline
 <p align="center">
