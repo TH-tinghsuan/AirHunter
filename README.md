@@ -15,11 +15,47 @@ Bulit the web base on Flask framework, and used Nginx as a revers proxy server.
 ![image](https://github.com/TH-tinghsuan/git_practice/assets/134147328/bf6599e5-769e-4dbd-ab27-a1c1bd538078)
 
 ## Data Pipeline
-<img width="365" alt="image" src="https://github.com/TH-tinghsuan/git_practice/assets/134147328/6c298dc6-94df-4b68-9419-a3841eb50837">
-
+<p align="center">
+  <img width="618" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/20616c5d-b261-4fea-b051-403a4143aca5">
+</p>
 
 ## Features
 - #### Search for flight ticket prices and then direct users to the travel agent's booking page.
+  
+
+https://github.com/TH-tinghsuan/AirHunter/assets/134147328/8e472a39-f3aa-4efd-b568-30dece78c997
+
+
 - #### A dashboard that provides an overview of price trends for specific departure and destination combinations.
+
+
+https://github.com/TH-tinghsuan/AirHunter/assets/134147328/855c4a35-272f-4c61-867c-924aa65e8d51
+
+
 - #### A tracking list feature for users to monitor their preferred airlines, with an automatic email notification system that informs users when ticket prices drop.
-- #### Compare today's prices with those from yesterday and display the top four price drops on the main page.
+
+
+https://github.com/TH-tinghsuan/AirHunter/assets/134147328/8b4c5d20-4ba7-4fe9-acfe-3ed464b31c23
+
+## Skills
+
+> Data Pipeline
+- Airflow
+> Backend
+- Flask
+> Database
+- MySQL
+> Frontend
+- HTML
+- CSS
+- JavaScript
+> Networking
+- Nginx
+- SSL Certificate(Let's Encrypt)
+> CI/CD
+- GitHub Actions
+> Others
+- AWS EC2
+- AWS RDS
+- AWS S3
+- AWS SQS
