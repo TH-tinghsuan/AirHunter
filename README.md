@@ -12,12 +12,13 @@ Scraping data from four travel agent websites, processing it using ETL, and stor
 #### Web Server
 Bulit the web base on Flask framework, and used Nginx as a revers proxy server.
 
-![framework_img](https://github.com/TH-tinghsuan/AirHunter/assets/134147328/a9bba011-d884-4815-9021-1926df6996c5)
+<img width="1606" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/205022e5-3b14-4488-9e94-0211b5ba9ba0">
 
-## Data Pipeline
+## Airflow workflow
 <p align="center">
-  <img width="618" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/20616c5d-b261-4fea-b051-403a4143aca5">
+  <img width="623" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/5c467730-d1ac-43c9-a252-a27950a6280f">
 </p>
+
 
 ## Features
 - #### Search for flight ticket prices and then direct users to the travel agent's booking page.
