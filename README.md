@@ -12,11 +12,11 @@ Scraping data from four travel agent websites, processing it using ETL, and stor
 #### Web Server
 Bulit the web base on Flask framework, and used Nginx as a revers proxy server.
 
-<img width="1606" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/205022e5-3b14-4488-9e94-0211b5ba9ba0">
+<img width="1606" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/a3e3fd1b-eea2-4130-9ef1-4a4ebaf5b4e9">
 
 ## Airflow workflow
 <p align="center">
-  <img width="623" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/5c467730-d1ac-43c9-a252-a27950a6280f">
+  <img width="623" alt="image" src="https://github.com/TH-tinghsuan/AirHunter/assets/134147328/de7fb05b-4313-4d61-a4bd-aed1ef2b69d1">
 </p>
 
 
