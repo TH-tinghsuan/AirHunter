@@ -59,4 +59,3 @@ https://github.com/TH-tinghsuan/AirHunter/assets/134147328/8b4c5d20-4ba7-4fe9-ac
 - AWS EC2
 - AWS RDS
 - AWS S3
-- AWS SQS
