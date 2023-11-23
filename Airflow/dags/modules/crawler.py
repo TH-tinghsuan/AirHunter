@@ -2,6 +2,7 @@ import json
 import time
 import logging
 import requests
+import random
 from datetime import datetime, timedelta
 from fake_useragent import UserAgent
 
@@ -109,12 +110,30 @@ def get_ezTravel_raw_data(depart_airport: str, arrive_airport: str, depart_date:
     except Exception as e:
         logging.error(f"error in get_ezTravel_raw_data: {e}")
 
+def set_proxy_ip_list():
+    url = "https://tq.lunaproxy.com/getflowip?neek=1122842&num=46&type=1&sep=1&regions=tw&ip_si=1&level=1&sb="
+    response = requests.get(url)
+    ip_list = response.text.strip().split("\r\n")
+    Variable.set("ip_list_key", ip_list)
+
+def get_random_ip():
+    ip_str = Variable.get("ip_list_key")
+    ip_list = ip_str.replace("[", "").replace("]", "").replace("'", "").split(",")
+    ip = random.choice(ip_list)
+    return ip.strip()
+
 def get_ezFly_Guid(dp_ct_name: str, ar_ct_name: str, dp_date: str) -> str:
-    root_url = "https://ea.ezfly.com/ProdDAIR/Json/GetDataTokenWithCallback/"
+    root_url = "http://ea.ezfly.com/ProdDAIR/Json/GetDataTokenWithCallback/"
     args = f"""?trip=OW&ct_from={dp_ct_name}&ct_to={ar_ct_name}&dp_date{dp_date}&rt_date=&adults=1&childs=0&olds=0&islands=0&islands_C=0&islands_O=0&s=&o=&AL=&Q=Q"""
     url = root_url + args
+    ip = "http://" + get_random_ip()
+    proxies = {"http": ip, "https": ip}
+    user_agent = UserAgent()
+    headers = {'User-Agent': user_agent.random}
+    rd_wait_time = random.randint(1,3)
+    time.sleep(rd_wait_time)
     try:
-        r = requests.get(url=url)
+        r = requests.get(url=url, headers=headers, proxies=proxies)
         if r.status_code == 200:
             response = r.text.replace("(", "").replace(")", "")
             data = json.loads(response)
@@ -136,8 +155,10 @@ def get_ezFly_raw_data(depart_airport: str, arrive_airport: str, date: str) -> d
                     "Guid": guid}
         user_agent = UserAgent()
         headers = {'User-Agent': user_agent.random}
+        ip = "http://" + get_random_ip()
+        proxies = {"http": ip, "https": ip}
         try:
-            r = requests.post(url="https://ea.ezfly.com/ProdDAIR/Home/GetProdLists", data=form_data, headers=headers)
+            r = requests.post(url="http://ea.ezfly.com/ProdDAIR/Home/GetProdLists", data=form_data, headers=headers, proxies=proxies)
             if r.status_code == 200:
                 data = r.text
                 if data:
@@ -153,6 +174,7 @@ def get_ezFly_raw_data(depart_airport: str, arrive_airport: str, date: str) -> d
 def scrape_and_upload_s3(start_date: datetime, total_dates: str, fun_name: callable, agent_name: str):
     search_date = Variable.get("search_date_key")    
     date_format = {"ezTravel": "%d/%m/%Y", "ezFly": "%Y%m%d", "lifeTour": "%Y%m%d", "richmond": "%Y-%m-%d"}
+
     date_list = [start_date + timedelta(days=i) for i in range(total_dates)]
     for date in date_list:
         total = get_all_by_date(date, date_format[agent_name], fun_name)

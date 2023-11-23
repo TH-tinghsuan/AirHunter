@@ -14,6 +14,10 @@ from modules.cloud import download_from_s3, get_sqs_message_num
 load_dotenv()
 
 SEARCH_DATE = Variable.get("search_date_key")
+date_obj = datetime.strptime(SEARCH_DATE, '%Y-%m-%d')
+current_date = date_obj + timedelta(days=1)
+DATE_LIST = [current_date.date() + timedelta(days=i) for i in range(61)]
+
 
 logging.basicConfig(level=logging.INFO)
 connection = pymysql.connect(host=os.getenv("DB_HOST"),
@@ -29,7 +33,7 @@ def generate_sql(data_list):
     cols = ", ".join('`{}`'.format(k) for k in data.keys())
     val_cols = ', '.join('%({})s'.format(k) for k in data.keys())
     sql = """
-    INSERT INTO flights_domestic_temp(%s) VALUES(%s)
+    INSERT INTO flights_domestic_main(%s) VALUES(%s)
     """ % (cols, val_cols)
     return sql
 
@@ -58,28 +62,32 @@ def parse_raw_data_richmond(item: BeautifulSoup, date: str) -> dict:
     except Exception as e:
         logging.error(f"error in parse_raw_data_richmond: {e}")
 
-def clean_data_richmond(filename: str):
-    raw_data = download_from_s3(filename)
-    date = filename.split("_")[0]
-    total = []
-    for d in raw_data["data"]:
-        soup = BeautifulSoup(d, "html.parser")   
-        flight_info = soup.find_all(class_="flight-wrap")      
-        for item in flight_info:
-            try:
-                info = parse_raw_data_richmond(item, date)
-                if info:
-                    total.append(info)
-            except:
-                logging.error(f"error when parsing richmond data: {e}")
-    sql = generate_sql(total)
-    try:
-        cursor.executemany(sql, total)
-        connection.commit()
-        logging.info(f"Done. counts: {len(total)}, filename: {filename}")
-    except Exception as e:
-        connection.rollback()
-        logging.info(f"Error: {e}, filename: {filename}")
+def clean_data_richmond():
+    for date in DATE_LIST:
+        filename = f"{date}_domestic_richmond_{SEARCH_DATE}.json"
+        raw_data = download_from_s3(filename)
+        date = filename.split("_")[0]
+        total = []
+        for d in raw_data["data"]:
+            soup = BeautifulSoup(d, "html.parser")   
+            flight_info = soup.find_all(class_="flight-wrap")      
+            for item in flight_info:
+                try:
+                    info = parse_raw_data_richmond(item, date)
+                    if info:
+                        total.append(info)
+                except:
+                    logging.error(f"error when parsing richmond data: {e}")
+        sql = generate_sql(total)
+        sql_del = "DELETE FROM flights_domestic_main WHERE search_date=%s AND DATE(depart_time)=%s AND agentName=\"richmond\";"
+        try:
+            cursor.execute(sql_del, (SEARCH_DATE, date))
+            cursor.executemany(sql, total)
+            connection.commit()
+            logging.info(f"Done. counts: {len(total)}, filename: {filename}")
+        except Exception as e:
+            connection.rollback()
+            logging.info(f"Error: {e}, filename: {filename}")
 
 def parse_raw_data_ezTravel(item: BeautifulSoup) -> dict:
     info ={}
@@ -104,29 +112,35 @@ def parse_raw_data_ezTravel(item: BeautifulSoup) -> dict:
         logging.error(f"error in parse_raw_data_ezTravel: {e}")
     
 
-def clean_data_ezTravel(filename: str):
-    raw_data = download_from_s3(filename)
-    total = []
-    for d in raw_data["data"]:
-        for item in d["flightList"]:
-            info ={}
-            if item["crossDays"] == 0:
-                for i in item['seats']:
-                    try:
-                        info = parse_raw_data_ezTravel(i)
-                        if info:    
-                            total.append(info)
-                    except Exception as e:
-                        logging.error(f"error when parsing ezTravel data: {e}")   
-
-    sql = generate_sql(total)
-    try:
-        cursor.executemany(sql, total)
-        connection.commit()
-        logging.info(f"Done. counts: {len(total)}, filename: {filename}")
-    except Exception as e:
-        connection.rollback()
-        logging.error(f"Error: {e}, filename: {filename}")
+def clean_data_ezTravel():
+    for date in DATE_LIST:
+        filename = f"{date}_domestic_ezTravel_{SEARCH_DATE}.json"
+        raw_data = download_from_s3(filename)
+        total = []
+        for d in raw_data["data"]:
+            for item in d["flightList"]:
+                info ={}
+                if item["crossDays"] == 0:
+                    for i in item['seats']:
+                        try:
+                            info = parse_raw_data_ezTravel(i)
+                            if info:    
+                                total.append(info)
+                        except Exception as e:
+                            logging.error(f"error when parsing ezTravel data: {e}")   
+        if total:
+            sql = generate_sql(total)
+            sql_del = "DELETE FROM flights_domestic_main WHERE search_date=%s AND DATE(depart_time)=%s AND agentName=\"ezTravel\";"
+            try:
+                cursor.execute(sql_del, (SEARCH_DATE, date))
+                cursor.executemany(sql, total)
+                connection.commit()
+                logging.info(f"Done. counts: {len(total)}, filename: {filename}")
+            except Exception as e:
+                connection.rollback()
+                logging.error(f"Error: {e}, filename: {filename}")
+        else:
+            logging.info(f"No data for filename: {filename}")
 
 def parse_ezFly_element(d: dict, formatted_date: str, element: BeautifulSoup) -> dict:
     try:
@@ -182,18 +196,22 @@ def parse_raw_data_ezFly(raw_data: dict) -> dict:
         logging.error(f"error in parse_raw_data_ezFly: {e}")
 
 
-def clean_data_ezFly(filename: str):
-    raw_data = download_from_s3(filename)
-    total = parse_raw_data_ezFly(raw_data["data"])
-    if total:
-        sql = generate_sql(total)
-        try:
-            cursor.executemany(sql, total)
-            connection.commit()
-            logging.info(f"Done. counts: {len(total)}, filename: {filename}")
-        except Exception as e:
-            connection.rollback()
-            logging.error(f"Error: {e}, filename: {filename}")
+def clean_data_ezFly():
+    for date in DATE_LIST:
+        filename = f"{date}_domestic_ezFly_{SEARCH_DATE}.json"
+        raw_data = download_from_s3(filename)
+        total = parse_raw_data_ezFly(raw_data["data"])
+        if total:
+            sql = generate_sql(total)
+            sql_del = "DELETE FROM flights_domestic_main WHERE search_date=%s AND DATE(depart_time)=%s AND agentName=\"ezFly\";"
+            try:
+                cursor.execute(sql_del, (SEARCH_DATE, date))
+                cursor.executemany(sql, total)
+                connection.commit()
+                logging.info(f"Done. counts: {len(total)}, filename: {filename}")
+            except Exception as e:
+                connection.rollback()
+                logging.error(f"Error: {e}, filename: {filename}")
 
 def parse_raw_data_lifetour(item: dict) -> dict:
     info ={}
@@ -213,51 +231,28 @@ def parse_raw_data_lifetour(item: dict) -> dict:
         logging.error(f"error in parse_raw_data_lifetour: {e}")
 
 
-def clean_data_lifetour(filename: str):
-    raw_data = download_from_s3(filename)
-    total = []
-    for d in raw_data["data"]:
-       if d["groupFareListCount"] != 0:
-        total_flights = d["groupFareList"]
-        for flights in total_flights:
-            for item in flights["GroupItineraryList"]:
-                info = parse_raw_data_lifetour(item)
-                if info:
-                    total.append(info)
-    sql = generate_sql(total)
-    try:
-        cursor.executemany(sql, total)
-        connection.commit()
-        logging.info(f"Done. counts: {len(total)}, filename: {filename}")
-    except Exception as e:
-        connection.rollback()
-        logging.error(f"Error: {e}, filename: {filename}")
-
-def insert_to_main_table():
-    search_date = SEARCH_DATE    
-    messages = get_sqs_message_num()
-    print(f"佇列中有 {messages} 則訊息。")
-    if messages > 0:
-        print(f"start to sleep {60*messages}")
-        time.sleep(30*messages)
-    else:
-        print("sleep for 2 minutes, waiting transfer job complete.")
-        time.sleep(120)
-
-    sql_drop = """DELETE FROM flights_domestic_main WHERE search_date = %s"""
-    sql_insert = """INSERT INTO flights_domestic_main SELECT * FROM flights_domestic_temp as t
-                WHERE DATE(t.search_date) = %s"""
-    sql_clear_temp = """TRUNCATE TABLE flights_domestic_temp"""
-    try:
-        cursor.execute(sql_drop, search_date)
-        connection.commit()
-        cursor.execute(sql_insert, search_date)
-        connection.commit()
-        cursor.execute(sql_clear_temp)
-        connection.commit()
-        logging.info(f"task: insert_to_main_table , job done")
-    except Exception as e:
-        logging.info(f"An error occurred in insert_to_main_table {e}")
-        connection.rollback()
+def clean_data_lifetour():
+    for date in DATE_LIST:
+        filename = f"{date}_domestic_lifeTour_{SEARCH_DATE}.json"
+        raw_data = download_from_s3(filename)
+        total = []
+        for d in raw_data["data"]:
+            if d["groupFareListCount"] != 0:
+                total_flights = d["groupFareList"]
+                for flights in total_flights:
+                    for item in flights["GroupItineraryList"]:
+                        info = parse_raw_data_lifetour(item)
+                        if info:
+                            total.append(info)
+        sql = generate_sql(total)
+        sql_del = "DELETE FROM flights_domestic_main WHERE search_date=%s AND DATE(depart_time)=%s AND agentName=\"lifeTour\";"
+        try:
+            cursor.execute(sql_del, (SEARCH_DATE, date))
+            cursor.executemany(sql, total)
+            connection.commit()
+            logging.info(f"Done. counts: {len(total)}, filename: {filename}")
+        except Exception as e:
+            connection.rollback()
+            logging.error(f"Error: {e}, filename: {filename}")
 
 
